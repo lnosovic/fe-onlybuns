@@ -3,6 +3,8 @@ import { Post } from '../models/post.model';
 // import { PostService } from '../post.service';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { User } from '../../user/models/user.model';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-posts-preview',
   standalone: true,
@@ -12,8 +14,8 @@ import { CommonModule } from '@angular/common';
 })
 export class PostsPreviewComponent implements OnInit{
   posts: Post[]=[];
-  usernames: []=[];
-  constructor(private http:HttpClient){}
+  usernames: {[userId:number]:string}={};
+  constructor(private http:HttpClient,private router:Router){}
   ngOnInit(): void {
     this.loadPosts();
     console.log(1)
@@ -22,10 +24,22 @@ export class PostsPreviewComponent implements OnInit{
     this.http.get<Post[]>('http://localhost:8080/api/posts').subscribe({
       next:(posts)=> {
           this.posts=posts;
+          this.posts.forEach(post=>this.fetchUsername(post.userId));
           console.log(1)
 
       },
       error: (err) => console.error('Error fetching posts:', err),
-    })
+    });
+  }
+  fetchUsername(userId:number){
+    this.http.get<User>(`http://localhost:8080/api/users/profile/${userId}`).subscribe({
+      next:(user)=>{
+        this.usernames[userId] = user.username;
+      },
+      error: (err) => console.error('Error fetching user:',err)
+    });
+  }
+  viewProfile(userId:number){
+    this.router.navigate(['profile',userId])
   }
 }

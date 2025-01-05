@@ -1,5 +1,7 @@
 <div *ngFor="let post of posts" >
+    <p (click)="viewProfile(post.userId)" style="cursor: pointer;">{{usernames[post.userId]}}</p>
     <p>{{post.image}}</p>
     <p>{{post.description}}</p>
     <p>{{post.likes}}</p>
+    <p>{{post.location.city}}</p>
 </div>
