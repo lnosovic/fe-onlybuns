@@ -1,0 +1,11 @@
+<div class="nav-bar">
+    <h1>ONLYBUNS</h1>
+    <div class="router">
+        <button (click)="posts()" class="router-button">Posts</button>
+    </div>
+    
+    <div class="login-logout">
+        <button class="logic-button" >Login</button>
+        <button class="logic-button" *ngIf="currentUser!==null">Logout</button>
+    </div>
+</div>
