@@ -21,4 +21,10 @@ export class NavbarComponent implements OnInit{
   posts(){
     this.router.navigate(["posts"]);
   }
+  login(){
+    this.router.navigate(["login"]);
+  }
+  logout(){
+
+  }
 }

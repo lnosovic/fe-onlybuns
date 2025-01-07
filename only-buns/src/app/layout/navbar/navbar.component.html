@@ -5,7 +5,7 @@
     </div>
     
     <div class="login-logout">
-        <button class="logic-button" >Login</button>
-        <button class="logic-button" *ngIf="currentUser!==null">Logout</button>
+        <button (click)="login()" class="logic-button" >Login</button>
+        <button (click)="logout()"class="logic-button" *ngIf="currentUser!==null">Logout</button>
     </div>
 </div>

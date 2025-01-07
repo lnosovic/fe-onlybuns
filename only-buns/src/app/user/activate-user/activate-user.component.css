@@ -1,0 +1,49 @@
+.activation-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(to left, greenyellow, #1c88c7);
+    font-family: Arial, sans-serif;
+  }
+  
+
+  .card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px 30px;
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .card h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+
+  .card p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+  }
+  
+
+  .activate-btn {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+
+  .activate-btn:hover {
+    background: #ff4757;
+  }
