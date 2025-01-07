@@ -15,6 +15,8 @@ import { Router } from '@angular/router';
 export class PostsPreviewComponent implements OnInit{
   posts: Post[]=[];
   usernames: {[userId:number]:string}={};
+  showComments=false;
+  selectedPost: any = null;
   constructor(private http:HttpClient,private router:Router){}
   ngOnInit(): void {
     this.loadPosts();
@@ -41,5 +43,13 @@ export class PostsPreviewComponent implements OnInit{
   }
   viewProfile(userId:number){
     this.router.navigate(['profile',userId])
+  }
+  openComments(post:Post){
+    this.selectedPost=post;
+    this.showComments=true;
+  }
+  closeComments(post:Post){
+    this.selectedPost=null;
+    this.showComments=false;
   }
 }

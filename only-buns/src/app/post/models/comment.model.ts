@@ -1,7 +1,8 @@
-export interface Commnet{
+export interface Comment{
     id:number
     userId:number;
-    description: string;
+    comment: string;
+    creatorUsername:string;
     createdAt: Date;
 
 }

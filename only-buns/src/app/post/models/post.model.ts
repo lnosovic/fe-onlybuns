@@ -1,4 +1,5 @@
-import {Location} from "./location.model"
+import {Location} from "./location.model";
+import { Comment } from "./comment.model";
 export interface Post{
     id: number;
     userId:number;
@@ -6,5 +7,6 @@ export interface Post{
     image: string;
     location:Location;
     likes:number;
+    comments:Comment[];
     
 }
