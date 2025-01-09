@@ -32,7 +32,7 @@ export class ProfileComponent implements OnInit {
   followers:User[] = [];
   following:User[] = [];
   posts: Post[] = [];
-  showFollowing:boolean = false;
+  showFollowings:boolean = false;
   showFollowers:boolean = false;
   isPostModalOpen: boolean = false;
   selectedPost:any=null;
@@ -46,7 +46,7 @@ export class ProfileComponent implements OnInit {
       this.loadUserFollowers(this.userId);
       this.loadUserFollowing(this.userId);
       this.showFollowers=false;
-      this.showFollowing=false;
+      this.showFollowings=false;
     });
     this.loadCurrentUser();
   }
@@ -126,14 +126,21 @@ export class ProfileComponent implements OnInit {
     }
   }
   closePostModal(){
+    this.selectedPost=null;
     this.isPostModalOpen=false;
   }
   openFollowers(){
-    this.showFollowing=false;
+    this.showFollowings=false;
     this.showFollowers=true;
   }
-  openFollowing(){
-    this.showFollowing=true;
+  openFollowings(){
+    this.showFollowings=true;
+    this.showFollowers=false;
+  }
+  closeFollowings(){
+    this.showFollowings=false;
+  }
+  closeFollowers(){
     this.showFollowers=false;
   }
 }

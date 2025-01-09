@@ -19,7 +19,7 @@
                 <button class="close-button" (click)="closeComments(post)">Close Comments ✖️</button>
             </div>
             <div *ngFor="let comment of post.comments" class="comment">
-                <p class="comment-user" (click)="viewProfile(comment.userId)">{{comment.creatorUsername}}:{{comment.comment}}</p>
+                <p><span class="comment-user" (click)="viewProfile(comment.userId)">{{comment.creatorUsername}}</span>:{{comment.text}}</p>
             </div>
             <div class="add-comment">
                 <input placeholder="Add a comment...">

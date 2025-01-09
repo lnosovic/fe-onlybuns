@@ -1,64 +1,74 @@
 <div class="profile-container">
     <div class="user-info">
-        <p>{{userProfile?.username}}</p>
-        <p>{{userProfile?.name}} {{userProfile?.surname}}</p>
-        <p>{{userProfile?.email}}</p>
-        <p (click)="openFollowing()">Following {{userProfile?.followingCount}}</p>
-        <p (click)="openFollowers()">Followers {{userProfile?.followerCount}}</p>
-        <p>Posts {{userProfile?.postCount}}</p>
-        <p>{{userProfile?.location?.country}}, {{userProfile?.location?.city}}</p>
-    </div>
-    <div *ngIf="showFollowing">
         <div>
-            <h3>Following</h3>
-            <ul>
-                <li *ngFor="let user of following">
-                    <p (click)="viewProfile(user.id)">{{user.username}}</p>
-                </li>
-            </ul>
+            <h2>{{ userProfile?.username }}</h2>
+        </div>
+        <div>
+            <p class="clickable" (click)="openFollowings()">Following: {{ userProfile?.followingCount }}</p>
+            <p class="clickable" (click)="openFollowers()">Followers: {{ userProfile?.followerCount }}</p>
+        </div>
+        <div>
+            <p>{{ userProfile?.name }} {{ userProfile?.surname }}</p>
+            <p>{{ userProfile?.email }}</p>
+            <p>{{ userProfile?.location?.country }}, {{ userProfile?.location?.city }}</p>
         </div>
     </div>
-    <div *ngIf="showFollowers">
-        <div>
-            <h3>Followers</h3>
-            <ul>
-                <li *ngFor="let user of followers">
-                    <p (click)="viewProfile(user.id)">{{user.username}}</p>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <hr>
+  
     <div class="post-thumbnails">
         <div *ngFor="let post of posts">
-            <img [src]="'https://images7.memedroid.com/images/UPLOADED412/5fd9180d366ee.jpeg'" alt="Thumbnail" class="post-image" (click)="openPostModal(post)">
+            <img [src]="'https://images7.memedroid.com/images/UPLOADED412/5fd9180d366ee.jpeg'" alt="Thumbnail" class="post-image" (click)="openPostModal(post)" />
         </div>
     </div>
-    <div class="post" *ngIf="isPostModalOpen">
-        <div class="close-post-modal">
-            <button class="close-button" (click)="closePostModal()">Close Post ✖️</button>
-        </div>
+  </div>
+  
+  <div *ngIf="isPostModalOpen" class="overlay" (click)="closePostModal()"></div>
+    <div *ngIf="isPostModalOpen" class="post-modal">
         <div class="post-header">
-            <span class="post-user" (click)="viewProfile(selectedPost.userId)">{{userProfile?.username}} </span>
-            <span class="post-location">{{selectedPost.location.city}}</span>
+            <span (click)="viewProfile(selectedPost.userId)">{{ selectedPost.creatorUsername }}</span>
+            <span>{{ selectedPost.location?.city }}</span>
         </div>
-        <div class="post-image">
-            <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" />
-        </div>
+            <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" class="post-image" />
         <div class="post-actions">
-            <span>❤️: {{selectedPost.likes}}</span>
-            <span class="comments"> 💬: {{selectedPost.comments.length}} </span>
+            ❤️ {{ selectedPost.likes }} &nbsp; 💬 {{ selectedPost.comments?.length }}
         </div>
         <div class="post-description">
-            <p><b (click)="viewProfile(selectedPost.userId)" class="post-user">{{userProfile?.username}}</b> {{selectedPost.description}}</p>
+            <p><b>{{ selectedPost.creatorUsername }}</b> {{ selectedPost.description }}</p>
         </div>
         <div class="post-comments">
-            <div *ngFor="let comment of selectedPost.comments" class="comment">
-                <p class="comment-user" (click)="viewProfile(comment.userId)">{{comment.creatorUsername}}:{{comment.comment}}</p>
+            <div *ngFor="let comment of selectedPost.comments">
+                <p><b (click)="viewProfile(comment.userId)" style="cursor: pointer;">{{ comment.creatorUsername }}</b>: {{ comment.text }}</p>
             </div>
             <div class="add-comment">
-                <input placeholder="Add a comment...">
-                <button (click)="addComment()" class="post-button">Post</button>
+                <input type="text" placeholder="Add a comment..." />
+                <button (click)="addComment()">Post</button>
             </div>
-    </div>
-</div>
+        </div>
+  </div>
+  
+  <div *ngIf="showFollowings" class="overlay" (click)="closeFollowings()"></div>
+  <div *ngIf="showFollowings" class="follow-modal">
+        <div class="modal-header">
+            <h3>Following</h3>
+            <button (click)="closeFollowings()">✖</button>
+        </div>
+        <ul>
+            <li *ngFor="let user of following">
+                <span>{{ user.username }}</span>
+                <span (click)="viewProfile(user.id)" style="cursor: pointer;">View Profile</span>
+            </li>
+        </ul>
+  </div>
+  
+  <div *ngIf="showFollowers" class="overlay" (click)="closeFollowers()"></div>
+  <div *ngIf="showFollowers" class="follow-modal">
+        <div class="modal-header">
+            <h3>Followers</h3>
+            <button (click)="closeFollowers()">✖</button>
+        </div>
+        <ul>
+            <li *ngFor="let user of followers">
+                <span>{{ user.username }}</span>
+                <span (click)="viewProfile(user.id)" style="cursor: pointer;">View Profile</span>
+            </li>
+        </ul>
+  </div>
