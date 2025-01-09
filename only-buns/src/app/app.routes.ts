@@ -11,7 +11,8 @@ export const routes: Routes = [
     { path: 'profile/:id',component:ProfileComponent},
     { path: 'login',component:LoginComponent},
     { path: 'sign-up',component:RegistrationComponent},
-    { path: 'activation/:id', component:ActivateUserComponent}
+    { path: 'activation/:id', component:ActivateUserComponent},
+    { path: 'home',component:PostsPreviewComponent}
     // Dodajte druge rute po potrebi
   ];
   

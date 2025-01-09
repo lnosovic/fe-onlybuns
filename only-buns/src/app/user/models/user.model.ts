@@ -1,3 +1,4 @@
+import { Location } from "../../post/models/location.model";
 import {Role} from "./role" 
 export interface User{
     id:number;
@@ -6,6 +7,7 @@ export interface User{
     surname: string;
     email: string;
     role: Role;
+    location: Location;
     postCount: number;
     followerCount:number;
     followingCount:number;

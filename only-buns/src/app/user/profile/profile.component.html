@@ -1,9 +1,64 @@
-<p>profile works!</p>
-<div>
-    <p>{{user?.username}}</p>
-    <p>{{user?.name}} {{user?.surname}}</p>
-    <p>{{user?.email}}</p>
-    <p>Following {{user?.followingCount}}</p>
-    <p>Followers {{user?.followerCount}}</p>
-    <p>Posts {{user?.postCount}}</p>
+<div class="profile-container">
+    <div class="user-info">
+        <p>{{userProfile?.username}}</p>
+        <p>{{userProfile?.name}} {{userProfile?.surname}}</p>
+        <p>{{userProfile?.email}}</p>
+        <p (click)="openFollowing()">Following {{userProfile?.followingCount}}</p>
+        <p (click)="openFollowers()">Followers {{userProfile?.followerCount}}</p>
+        <p>Posts {{userProfile?.postCount}}</p>
+        <p>{{userProfile?.location?.country}}, {{userProfile?.location?.city}}</p>
+    </div>
+    <div *ngIf="showFollowing">
+        <div>
+            <h3>Following</h3>
+            <ul>
+                <li *ngFor="let user of following">
+                    <p (click)="viewProfile(user.id)">{{user.username}}</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div *ngIf="showFollowers">
+        <div>
+            <h3>Followers</h3>
+            <ul>
+                <li *ngFor="let user of followers">
+                    <p (click)="viewProfile(user.id)">{{user.username}}</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <hr>
+    <div class="post-thumbnails">
+        <div *ngFor="let post of posts">
+            <img [src]="'https://images7.memedroid.com/images/UPLOADED412/5fd9180d366ee.jpeg'" alt="Thumbnail" class="post-image" (click)="openPostModal(post)">
+        </div>
+    </div>
+    <div class="post" *ngIf="isPostModalOpen">
+        <div class="close-post-modal">
+            <button class="close-button" (click)="closePostModal()">Close Post ✖️</button>
+        </div>
+        <div class="post-header">
+            <span class="post-user" (click)="viewProfile(selectedPost.userId)">{{userProfile?.username}} </span>
+            <span class="post-location">{{selectedPost.location.city}}</span>
+        </div>
+        <div class="post-image">
+            <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" />
+        </div>
+        <div class="post-actions">
+            <span>❤️: {{selectedPost.likes}}</span>
+            <span class="comments"> 💬: {{selectedPost.comments.length}} </span>
+        </div>
+        <div class="post-description">
+            <p><b (click)="viewProfile(selectedPost.userId)" class="post-user">{{userProfile?.username}}</b> {{selectedPost.description}}</p>
+        </div>
+        <div class="post-comments">
+            <div *ngFor="let comment of selectedPost.comments" class="comment">
+                <p class="comment-user" (click)="viewProfile(comment.userId)">{{comment.creatorUsername}}:{{comment.comment}}</p>
+            </div>
+            <div class="add-comment">
+                <input placeholder="Add a comment...">
+                <button (click)="addComment()" class="post-button">Post</button>
+            </div>
+    </div>
 </div>

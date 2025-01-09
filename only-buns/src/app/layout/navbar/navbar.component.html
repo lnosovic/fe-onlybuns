@@ -2,10 +2,11 @@
     <h1>ONLYBUNS</h1>
     <div class="router">
         <button (click)="posts()" class="router-button">Posts</button>
+        <button (click)="profile()" class="router-button" *ngIf="getToken()!==null">Profile</button>
     </div>
     
     <div class="login-logout">
-        <button (click)="login()" class="logic-button" >Login</button>
-        <button (click)="logout()"class="logic-button" *ngIf="currentUser!==null">Logout</button>
+        <button (click)="login()" class="logic-button" *ngIf="getToken()===null">Login</button>
+        <button (click)="logout()"class="logic-button" *ngIf="getToken()!==null">Logout</button>
     </div>
 </div>

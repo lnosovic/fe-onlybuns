@@ -37,12 +37,16 @@ export class LoginComponent implements OnInit{
       };
       this.http.post<any>(`http://localhost:8080/auth/login`,body,{headers: loginHeaders        
       }).pipe(map((res)=>{
-        this.access_token=res.access_token;
-        localStorage.setItem('jwt',res.access_token);
+        this.access_token=res.accessToken;
+        console.log('dobroje'+ res.accessToken)
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.setItem('jwt', res.accessToken);
+        }
         console.log(this.access_token)
       })).subscribe({
         next:()=>{
           console.log('Login successful');
+          this.router.navigate(['home']);
         },
         error: (err) => {
           console.error('Error fetching user:',err);
