@@ -1,0 +1,86 @@
+<div class="trends-container">
+  <h1 class="h1-trends">Trends</h1>
+  <div class="summary">
+    <div class="stat">
+      <h2>Total Posts</h2>
+      <p>{{ countAllPosts }}</p>
+    </div>
+    <div class="stat">
+      <h2>Posts This Month</h2>
+      <p>{{ countAllPostsThisMonth }}</p>
+    </div>
+  </div>
+  <div class="tabs">
+    <button (click)="activeTab = 'top5Posts'"  (click)="setActiveTab('top5Posts')">Top 5 Posts (Last 7 Days)</button>
+    <button (click)="activeTab = 'top10Posts'" (click)="setActiveTab('top10Posts')">Top 10 Posts Ever</button>
+    <button (click)="activeTab = 'top10Users'" (click)="setActiveTab('top10Users')">Top 10 Users (Last 7 Days)</button>
+  </div>
+
+  <div class="post-container" *ngIf="activeTab==='top5Posts'">
+    <div class="post" *ngFor="let post of posts">
+      <div class="post-header">
+        <span class="post-user" (click)="viewProfile(post.userId)">{{usernames[post.userId]}} </span>
+        <span class="post-location">{{post.location.city}}</span>
+      </div>
+      <div class="post-image">
+        <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" />
+      </div>
+      <div class="post-actions">
+        <span>❤️: {{post.likes}}</span>
+        <span class="comments" (click)="openComments(post)"> 💬: {{post.comments.length}} </span>
+      </div>
+      <div class="post-description">
+        <p><b (click)="viewProfile(post.userId)" class="post-user">{{usernames[post.userId]}}</b> {{post.description}}</p>
+      </div>
+      <div *ngIf="showComments && selectedPost===post" class="post-comments">
+        <div class="close-comments">
+            <button class="close-button" (click)="closeComments(post)">Close Comments ✖️</button>
+        </div>
+        <div *ngFor="let comment of post.comments" class="comment">
+            <p><span class="comment-user" (click)="viewProfile(comment.userId)">{{comment.creatorUsername}}</span>:{{comment.text}}</p>
+        </div>
+        <div class="add-comment">
+            <input placeholder="Add a comment...">
+            <button (click)="addComment()" class="post-button">Post</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="post-container" *ngIf="activeTab==='top10Posts'">
+    <div class="post" *ngFor="let post of posts">
+      <div class="post-header">
+        <span class="post-user" (click)="viewProfile(post.userId)">{{usernames[post.userId]}} </span>
+        <span class="post-location">{{post.location.city}}</span>
+      </div>
+      <div class="post-image">
+        <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" />
+      </div>
+      <div class="post-actions">
+        <span>❤️: {{post.likes}}</span>
+        <span class="comments" (click)="openComments(post)"> 💬: {{post.comments.length}} </span>
+      </div>
+      <div class="post-description">
+        <p><b (click)="viewProfile(post.userId)" class="post-user">{{usernames[post.userId]}}</b> {{post.description}}</p>
+      </div>
+      <div *ngIf="showComments && selectedPost===post" class="post-comments">
+        <div class="close-comments">
+            <button class="close-button" (click)="closeComments(post)">Close Comments ✖️</button>
+        </div>
+        <div *ngFor="let comment of post.comments" class="comment">
+            <p><span class="comment-user" (click)="viewProfile(comment.userId)">{{comment.creatorUsername}}</span>:{{comment.text}}</p>
+        </div>
+        <div class="add-comment">
+            <input placeholder="Add a comment...">
+            <button (click)="addComment()" class="post-button">Post</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab==='top10Users'">
+    <div class="user" *ngFor="let user of users" (click)="viewProfile(user.id)">
+      <p>{{user.username}}</p>
+    </div>
+  </div>
+</div>

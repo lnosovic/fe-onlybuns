@@ -63,6 +63,9 @@ export class NavbarComponent implements OnInit{
       }
     }
   }
+  trends(){
+    this.router.navigate(['trends']);
+  }
   getToken(): string | null {
     if (typeof window !== 'undefined' && window.localStorage) {
       return localStorage.getItem('jwt');

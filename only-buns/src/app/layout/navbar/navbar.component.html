@@ -3,6 +3,7 @@
     <div class="router">
         <button (click)="posts()" class="router-button">Posts</button>
         <button (click)="profile()" class="router-button" *ngIf="getToken()!==null">Profile</button>
+        <button (click)="trends()" class="router-button"  *ngIf="getToken()!==null">Trends</button>
     </div>
     
     <div class="login-logout">
