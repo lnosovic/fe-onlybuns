@@ -1,0 +1,30 @@
+<div class="post-container">
+    <div class="post" *ngFor="let post of posts" >
+        <div class="post-header">
+            <span class="post-user" (click)="viewProfile(post.userId)">{{usernames[post.userId]}} </span>
+            <span class="post-location">{{post.location.city}}</span>
+        </div>
+        <div class="post-image">
+            <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" />
+        </div>
+        <div class="post-actions">
+            <span>❤️: {{post.likes}}</span>
+            <span class="comments" (click)="openComments(post)"> 💬: {{post.comments.length}} </span>
+        </div>
+        <div class="post-description">
+            <p><b (click)="viewProfile(post.userId)" class="post-user">{{usernames[post.userId]}}</b> {{post.description}}</p>
+        </div>
+        <div *ngIf="showComments && selectedPost===post" class="post-comments">
+            <div class="close-comments">
+                <button class="close-button" (click)="closeComments(post)">Close Comments ✖️</button>
+            </div>
+            <div *ngFor="let comment of post.comments" class="comment">
+                <p><span class="comment-user" (click)="viewProfile(comment.userId)">{{comment.creatorUsername}}</span>:{{comment.text}}</p>
+            </div>
+            <div class="add-comment">
+                <input placeholder="Add a comment...">
+                <button (click)="addComment()" class="post-button">Post</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,144 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.post-container{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    
+}
+.post {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #555;
+}
+.post-user {
+    font-weight: bold;
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: none;
+}
+.post-user {
+    font-weight: bold;
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.post-user:hover {
+    text-decoration: underline;
+}
+.post-location {
+    color: #888;
+}
+.post-image img {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #555;
+}
+.comments {
+    cursor: pointer;
+    color: #007bff;
+}
+
+.comments:hover {
+    text-decoration: underline;
+}
+.post-description {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #333;
+}
+.post-comments {
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.comment {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.comment-user {
+    font-weight: bold;
+    cursor: pointer;
+    color: #007bff;
+}
+
+.comment-user:hover {
+    text-decoration: underline;
+}
+
+.add-comment {
+    display: flex;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.add-comment input {
+    flex: 1;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.add-comment input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.post-button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.post-button:hover {
+    background-color: #0056b3;
+}
+.close-comments {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.close-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    background-color: #e60000;
+}

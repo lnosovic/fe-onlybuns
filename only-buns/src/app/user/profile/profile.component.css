@@ -1,0 +1,195 @@
+
+.profile-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .user-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 20px;
+  }
+
+  .user-info div {
+    flex: 1;
+    margin: 10px;
+    text-align: center;
+  }
+
+  .user-info h2 {
+    margin: 0;
+    color: #333;
+  }
+
+  .user-info p {
+    margin: 5px 0;
+    color: #555;
+    font-size: 14px;
+  }
+
+  .user-info p.clickable {
+    color: #007bff;
+    cursor: pointer;
+  }
+
+  .user-info p.clickable:hover {
+    text-decoration: underline;
+  }
+
+  .follow-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 20px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    color: #333;
+  }
+
+  .modal-header button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+  }
+
+  .modal-header button:hover {
+    color: #e60000;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  ul li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  ul li:last-child {
+    border-bottom: none;
+  }
+
+  .post-thumbnails {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .post-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .post-image:hover {
+    transform: scale(1.05);
+  }
+
+  .post-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    z-index: 1000;
+  }
+
+  .post-modal .post-header,
+  .post-modal .post-actions,
+  .post-modal .post-description {
+    margin-bottom: 15px;
+  }
+
+  .post-modal .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .post-header span {
+    font-weight: bold;
+    cursor: pointer;
+    color: #007bff;
+  }
+
+  .post-header span:hover {
+    text-decoration: underline;
+  }
+
+  .post-comments {
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+
+  .add-comment {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .add-comment input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+
+  .add-comment button {
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .add-comment button:hover {
+    background-color: #0056b3;
+  }
+
+  /* Overlay for modals */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
