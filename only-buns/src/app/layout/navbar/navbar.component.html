@@ -4,6 +4,8 @@
         <button (click)="posts()" class="router-button">Posts</button>
         <button (click)="profile()" class="router-button" *ngIf="getToken()!==null">Profile</button>
         <button (click)="trends()" class="router-button"  *ngIf="getToken()!==null">Trends</button>
+        <button (click)="map1()" class="router-button">Map</button>
+        <button (click)="map()" class="router-button" *ngIf="getToken()!==null">Map</button>
     </div>
     
     <div class="login-logout">

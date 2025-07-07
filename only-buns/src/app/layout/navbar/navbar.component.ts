@@ -72,4 +72,10 @@ export class NavbarComponent implements OnInit{
     }
     return null;
   }
+  map1(){
+    this.router.navigate(['map']);
+  }
+  map(){
+    this.router.navigate(['posts-map']);
+  }
 }
