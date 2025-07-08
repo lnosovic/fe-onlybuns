@@ -8,6 +8,8 @@ import { ActivateUserComponent } from './user/activate-user/activate-user.compon
 import { TrendsComponent } from './post/trends/trends.component';
 import { MapComponent } from './layout/map/map.component';
 import { PostsMapComponent } from './post/posts-map/posts-map.component';
+import { AdminDashboardComponent } from './admin/admin-dashboard/admin-dashboard.component';
+import { AdminGuard } from './user/auth/admin.guard';
 
 export const routes: Routes = [
     { path: 'posts', component: PostsPreviewComponent },
@@ -19,6 +21,13 @@ export const routes: Routes = [
     { path: 'trends',component:TrendsComponent},
     { path: 'map',component:MapComponent},
     { path: 'posts-map', component:PostsMapComponent},
+    { path: 'admin', component: AdminDashboardComponent, canActivate: [AdminGuard] }, // <-- DODAJ canActivate: [AdminGuard]
+
+
+
+
+    { path: '', redirectTo: 'home', pathMatch: 'full' },
+    { path: '**', redirectTo: 'home' }
     // Dodajte druge rute po potrebi
   ];
   
