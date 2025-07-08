@@ -49,8 +49,12 @@ export class LoginComponent implements OnInit{
           this.router.navigate(['home']);
         },
         error: (err) => {
-          console.error('Error fetching user:',err);
-          alert('Invalid username or password');
+          if(err.status===429){
+            alert('Too many login attempts. Please wait a minute.');
+          }else{
+            console.error('Error fetching user:',err);
+            alert('Invalid username or password');
+          }
         }
       })
     }
