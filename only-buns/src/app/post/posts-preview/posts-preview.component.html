@@ -4,14 +4,16 @@
             <span class="post-user" (click)="viewProfile(post.userId)">{{usernames[post.userId]}} </span>
             <span class="post-location">{{post.location.city}}</span>
         </div>
-        <div class="post-image">
+        <div class="post-image" (click)="viewPostDetails(post.id)">
             <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" />
         </div>
         <div class="post-actions">
-            <span>❤️: {{post.likes}}</span>
-            <span class="comments" (click)="openComments(post)"> 💬: {{post.comments.length}} </span>
+
+            <span class="like-button" (click)="toggleLike(post)">
+                <span *ngIf="post.isLikedByUser" style="color: red;">❤️</span> <span *ngIf="!post.isLikedByUser">🤍</span> </span>
+            <span>: {{post.likes}}</span> <span class="comments" (click)="openComments(post)"> 💬: {{post.comments.length}} </span>
         </div>
-        <div class="post-description">
+        <div class="post-description" (click)="viewPostDetails(post.id)">
             <p><b (click)="viewProfile(post.userId)" class="post-user">{{usernames[post.userId]}}</b> {{post.description}}</p>
         </div>
         <div *ngIf="showComments && selectedPost===post" class="post-comments">
