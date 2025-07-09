@@ -1,4 +1,4 @@
 export interface JwtAuthenticationRequest{
-    email: string;
+    username: string;
     password: string;
 }
