@@ -8,5 +8,5 @@ export interface Post{
     location:Location;
     likes:number;
     comments:Comment[];
-    
+    isLikedByUser?: boolean;  
 }

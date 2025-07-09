@@ -4,6 +4,7 @@ import { User } from '../models/user.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Post } from '../../post/models/post.model';
+import { PostService } from '../../post/post.service';
 
 @Component({
   selector: 'app-profile',
@@ -23,8 +24,7 @@ export class ProfileComponent implements OnInit {
     location: {id:0,longitude:0,latitude:0,country:'',city:''},
     postCount: 0,
     followerCount: 0,
-    followingCount: 0
-    
+    followingCount: 0    
   }
   userProfile:User |null = null;
   followingUser: User[] = [];
@@ -36,17 +36,26 @@ export class ProfileComponent implements OnInit {
   showFollowers:boolean = false;
   isPostModalOpen: boolean = false;
   selectedPost:any=null;
+  showComments=false;
+  isHoveringUnfollow = false;
   
-  constructor(private http:HttpClient,private activeRouter:ActivatedRoute,private router:Router){}
+  constructor(private http:HttpClient,private activeRouter:ActivatedRoute,private router:Router, private postService: PostService){}
   ngOnInit(): void {
-    this.activeRouter.params.subscribe(params => {
-      this.userId = +params['id'];
-      this.loadUserInfo(this.userId); 
-      this.loadUserPosts(this.userId);
-      this.loadUserFollowers(this.userId);
-      this.loadUserFollowing(this.userId);
-      this.showFollowers=false;
-      this.showFollowings=false;
+    this.activeRouter.params.subscribe(async params => {
+
+        try{
+          this.userId = +params['id'];
+          this.loadUserInfo(this.userId); 
+          this.loadUserPosts(this.userId);
+          this.loadUserFollowers(this.userId);
+          this.loadUserFollowing(this.userId);
+          this.showFollowers=false;
+          this.showFollowings=false;
+        }catch{
+
+        }
+
+
     });
     this.loadCurrentUser();
   }
@@ -142,5 +151,124 @@ export class ProfileComponent implements OnInit {
   }
   closeFollowers(){
     this.showFollowers=false;
+  }
+  toggleLike(post: Post): void {
+    // Proveri da li je korisnik ulogovan pre nego što pokuša da lajkuje/dislajkuje
+    if (!this.currentUser || this.currentUser.id === 0 || (this.currentUser.role.name !== 'ROLE_USER' && this.currentUser.role.name !== 'ROLE_ADMIN')) {
+        alert('Morate biti ulogovani da biste lajkovali objave!');
+        this.router.navigate(['/login']); // Preusmeri na login
+        return;
+    }
+
+    if (post.isLikedByUser) {
+      // Ako je već lajkovano, dislajkuj
+      this.postService.unlikePost(post.id).subscribe({
+        next: () => {
+          post.isLikedByUser = false; // Ažuriraj UI
+          post.likes--; // Smanji broj lajkova na UI
+          console.log(`Dislajkovao post ${post.id}`);
+        },
+        error: (err: Error) => {
+          console.error(`Greška pri dislajkovanju posta ${post.id}:`, err);
+          alert('Došlo je do greške prilikom dislajkovanja.');
+        }
+      });
+    } else {
+      // Ako nije lajkovano, lajkuj
+      this.postService.likePost(post.id).subscribe({
+        next: () => {
+          post.isLikedByUser = true; // Ažuriraj UI
+          post.likes++; // Povećaj broj lajkova na UI
+          console.log(`Lajkovao post ${post.id}`);
+        },
+        error: (err: Error) => {
+          console.error(`Greška pri lajkovanju posta ${post.id}:`, err);
+          alert('Došlo je do greške prilikom lajkovanja.');
+        }
+      });
+    }
+  }
+  toggleComments(post: any) {
+    if (this.showComments && this.selectedPost === post) {
+      // Ako su komentari već otvoreni za ovu objavu, zatvori ih
+      this.showComments = false;
+      this.selectedPost = null;
+    } else {
+      // Inače, otvori komentare za ovu objavu
+      this.showComments = true;
+      this.selectedPost = post;
+    }
+  }
+  closeComments(post:Post){
+    this.selectedPost=null;
+    this.showComments=false;
+  }
+
+  checkFollowingStatus(): boolean {
+    if (this.currentUser && this.currentUser.id !== 0 && this.userProfile && this.userProfile.id !== 0 && this.currentUser.id !== this.userProfile.id) {
+      return this.followers.some(follower => follower.id === this.currentUser!.id);
+    } else {
+      return false;
+    }
+  }
+
+  followUser(): void {
+    if (!this.userProfile || this.userProfile.id === null || this.userProfile.id === 0) return;
+    if (!this.currentUser || this.currentUser.id === null || this.currentUser.id === 0) {
+      alert('Morate biti ulogovani da biste pratili korisnike.');
+      this.router.navigate(['/login']);
+      return;
+    }
+    if (this.currentUser.id === this.userProfile.id) {
+      alert('Ne možete pratiti samog sebe.');
+      return;
+    }
+
+    const token = localStorage.getItem("jwt") || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
+    });
+
+    this.http.post(`http://localhost:8080/api/users/${this.userProfile.id}/follow`, {}, { headers }).subscribe({
+      next: () => {
+        // if (this.userProfile) {
+        //   this.userProfile.followerCount = (this.userProfile.followerCount || 0) + 1;
+        // }
+        // console.log(`Uspešno praćenje korisnika ${this.userProfile?.username}`);
+      },
+      error: (err) => {
+        console.error('Greška pri praćenju korisnika:', err);
+        alert('Došlo je do greške prilikom praćenja.');
+      }
+    });
+  }
+
+  unfollowUser(): void {
+    if (!this.userProfile || this.userProfile.id === null || this.userProfile.id === 0) return;
+    if (!this.currentUser || this.currentUser.id === null || this.currentUser.id === 0) {
+      alert('Morate biti ulogovani da biste prekinuli praćenje.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const token = localStorage.getItem("jwt") || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
+    });
+
+    this.http.delete(`http://localhost:8080/api/users/${this.userProfile.id}/unfollow`, { headers }).subscribe({
+      next: () => {
+        if (this.userProfile && this.userProfile.followerCount > 0) {
+          this.userProfile.followerCount--;
+        }
+        console.log(`Uspešno prekinuto praćenje korisnika ${this.userProfile?.username}`);
+      },
+      error: (err) => {
+        console.error('Greška pri prekidu praćenja korisnika:', err);
+        alert('Došlo je do greške prilikom prekida praćenja.');
+      }
+    });
   }
 }
