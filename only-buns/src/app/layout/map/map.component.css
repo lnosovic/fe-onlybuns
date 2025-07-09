@@ -3,7 +3,7 @@
   }
   
   #map {
-    height: 630px; /* Ensure the map has a defined height */
+    height: 300px; /* Ensure the map has a defined height */
     width: 100%;
   }
   

@@ -5,15 +5,19 @@ import { Location } from '../../post/models/location.model';
 import { Registration } from '../models/registration.model';
 import { Router } from '@angular/router';
 import { HttpClient,HttpHeaders } from '@angular/common/http';
+import { MapComponent } from '../../layout/map/map.component'; 
+
 @Component({
   selector: 'app-registration',
   standalone: true,
-  imports: [ReactiveFormsModule,CommonModule],
+  imports: [ReactiveFormsModule,CommonModule,MapComponent],
   templateUrl: './registration.component.html',
   styleUrl: './registration.component.css'
 })
 export class RegistrationComponent implements OnInit {
   confirmPassword: any|null=null;
+  SelectedLocation: Location | null = null;
+  mapResetTrigger: boolean = false; 
   registrationForm = new FormGroup({
     name: new FormControl('',Validators.required),
     surname: new FormControl('',Validators.required),
@@ -28,13 +32,17 @@ export class RegistrationComponent implements OnInit {
   }
   registerUser():void{
     if(this.registrationForm.valid && this.checkPassword()){
-      const location:Location={
-        id:0,
-        longitude:20,
-        latitude:45,
-        country:'Serbia',
-        city:'Novi Sad',
+      if (!this.SelectedLocation) {
+        alert('Please select your location on the map.');
+        return;
       }
+       const location: Location = {
+          id: 0,
+          longitude: this.SelectedLocation.longitude,
+          latitude: this.SelectedLocation.latitude,
+          country: this.SelectedLocation.country,
+          city: this.SelectedLocation.city
+      };
       const user: Registration={
         id:0,
         username:this.registrationForm.value.username!,
@@ -52,8 +60,18 @@ export class RegistrationComponent implements OnInit {
       this.http.post<Registration>('http://localhost:8080/auth/signup',JSON.stringify(user),{headers:signupHeaders}).subscribe({
         next:()=>{
           this.resetForm();
+          this.SelectedLocation = null;
+          this.mapResetTrigger = true;
+          setTimeout(() => this.mapResetTrigger = false, 0);
         },
-        error: (err) => console.error('Error during registration:',err)
+        error: (err) => {
+          if (err.status === 409 && err.error) {
+            alert('Registration failed: ' + err.error); // prikazuje npr. "Username already exists"
+          } else {
+            console.error('Error during registration:', err);
+            alert('Unexpected error occurred during registration.');
+          }
+        }
       });
     }
   }
@@ -66,4 +84,8 @@ export class RegistrationComponent implements OnInit {
   resetForm():void{
     this.registrationForm.reset();
   }
+  onLocationSelected(location: Location): void {
+  console.log('Received location from map:', location);
+  this.SelectedLocation = location;
+}
 }

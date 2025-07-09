@@ -62,3 +62,13 @@
   .form-actions {
     margin-top: 20px;
   }
+  .location-row {
+  display: flex;
+  gap: 20px; /* razmak između polja */
+  align-items: center;
+}
+
+.location-field {
+  display: flex;
+  flex-direction: column;
+}
