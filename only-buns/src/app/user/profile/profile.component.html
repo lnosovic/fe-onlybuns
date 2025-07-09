@@ -1,74 +1,357 @@
-<div class="profile-container">
-    <div class="user-info">
-        <div>
-            <h2>{{ userProfile?.username }}</h2>
+<div class="flex flex-col items-center  w-full max-w-screen-lg mx-auto bg-base-100  rounded-lg overflow-hidden">
+    <!--PROFFILE DEO-->
+    <!--v1-->
+    <!-- <div class="bg-base-100 shadow-xl rounded-lg overflow-hidden p-6 mb-6 w-full max-w-lg mx-auto border-b border-base-200">
+        <div class="flex items-center gap-6 mb-8">
+          <div class="avatar online">
+            <div class="w-40 h-40 rounded-box overflow-hidden">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" alt="User Avatar" class="w-full h-full object-cover" />
+            </div>
+          </div>
+          
+          <div class="flex-grow">
+            <h2 class="text-3xl font-bold text-neutral-content mb-1">{{ userProfile?.username }}</h2>
+            <p class="text-xl text-gray-500">{{ userProfile?.name }} {{ userProfile?.surname }}</p>
+      
+            <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600">
+              <p class="hover:underline cursor-pointer flex items-center gap-1" (click)="openFollowings()">
+                <span class="font-semibold text-neutral-content">{{ userProfile?.followingCount }}</span> Following
+              </p>
+              <p class="hover:underline cursor-pointer flex items-center gap-1" (click)="openFollowers()">
+                <span class="font-semibold text-neutral-content">{{ userProfile?.followerCount }}</span> Followers
+              </p>
+            </div>
+      
+            <div class="mt-4 space-y-2 text-sm text-gray-700">
+              <p class="flex items-center gap-1" *ngIf="userProfile?.location?.city || userProfile?.location?.country">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.727A8 8 0 0120 12c0-5.523-4.477-10-10-10S0 6.477 0 12s4.477 10 10 10a8 8 0 007.657-3.273L22 22l-1.357-1.357A8 8 0 0017.657 16.727z" />
+                </svg>
+                <span>{{ userProfile?.location?.city }}<span *ngIf="userProfile?.location?.city && userProfile?.location?.country">,</span> {{ userProfile?.location?.country }}</span>
+              </p>
+      
+              <p class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>{{ userProfile?.email }}</span>
+              </p>
+            </div>
+          </div>
         </div>
-        <div>
-            <p class="clickable" (click)="openFollowings()">Following: {{ userProfile?.followingCount }}</p>
-            <p class="clickable" (click)="openFollowers()">Followers: {{ userProfile?.followerCount }}</p>
+      </div> -->
+
+
+    <!--v2-->
+    <!-- <div class="bg-base-100 shadow-xl rounded-lg overflow-hidden p-6 mb-6 w-full max-w-lg mx-auto border-b border-base-200">
+        <div class="flex flex-col items-center">
+          <div class="mb-6 mt-2">
+            <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-primary">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" alt="User Avatar" class="w-full h-full object-cover" />
+            </div>
+          </div>
+      
+          <h2 class="text-3xl font-bold text-neutral-content mb-1 text-center">{{ userProfile?.username }}</h2>
+          <p class="text-xl text-gray-500 mb-6 text-center">{{ userProfile?.name }} {{ userProfile?.surname }}</p>
+      
+          <button class="btn btn-primary btn-md w-full max-w-xs mb-6">Follow</button>
+      
+          <div class="flex justify-around w-full max-w-xs mb-6">
+            <div class="text-center">
+              <p class="text-xl font-bold text-neutral-content">{{ userProfile?.followingCount }}</p>
+              <p class="text-sm text-gray-500">Following</p>
+            </div>
+            <div class="text-center">
+              <p class="text-xl font-bold text-neutral-content">{{ userProfile?.followerCount }}</p>
+              <p class="text-sm text-gray-500">Followers</p>
+            </div>
+          </div>
+      
+          <div class="space-y-2 text-base text-gray-700 w-full px-4">
+            <p class="flex items-center gap-2 justify-center" *ngIf="userProfile?.location?.city || userProfile?.location?.country">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.727A8 8 0 0120 12c0-5.523-4.477-10-10-10S0 6.477 0 12s4.477 10 10 10a8 8 0 007.657-3.273L22 22l-1.357-1.357A8 8 0 0017.657 16.727z" />
+              </svg>
+              <span>{{ userProfile?.location?.city }}<span *ngIf="userProfile?.location?.city && userProfile?.location?.country">,</span> {{ userProfile?.location?.country }}</span>
+            </p>
+      
+            <p class="flex items-center gap-2 justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>{{ userProfile?.email }}</span>
+            </p>
+          </div>
         </div>
-        <div>
-            <p>{{ userProfile?.name }} {{ userProfile?.surname }}</p>
-            <p>{{ userProfile?.email }}</p>
-            <p>{{ userProfile?.location?.country }}, {{ userProfile?.location?.city }}</p>
+      </div> -->
+      <div class="bg-base-100 rounded-lg overflow-hidden p-6 mb-6 w-full max-w-lg mx-auto border-b border-base-200">
+        <div class="flex items-start gap-8">
+            <div class="flex-shrink-0 mt-2">
+                <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" alt="User Avatar" class="w-full h-full object-cover" />
+                </div>
+            </div>
+    
+            <div class="flex-grow flex flex-col pt-2">
+                <div class="flex items-center gap-4 mb-4">
+                    <p class="text-lg font-bold ">&commat;{{ userProfile?.username }}12123</p>
+                    <button
+                    *ngIf="currentUser && userProfile && currentUser.id !== userProfile.id"
+                    class="btn btn-sm btn-ghost"
+                    [ngClass]="{
+                        'btn-primary': !checkFollowingStatus(),
+                        'btn-error': checkFollowingStatus() && isHoveringUnfollow,
+                        'text-base-content': checkFollowingStatus() && !isHoveringUnfollow 
+                    }"
+                    (click)="checkFollowingStatus() ? unfollowUser() : followUser()"
+                    (mouseover)="isHoveringUnfollow = true"
+                    (mouseout)="isHoveringUnfollow = false"
+                >
+                    {{ checkFollowingStatus() ? (isHoveringUnfollow ? 'Unfollow' : 'Following') : 'Follow' }}
+                </button>
+                    <button class="btn btn-ghost btn-sm">Message</button>
+                </div>
+    
+                <div class="flex text-base-content items-center gap-8 mb-4">
+                    <p class="text-base">
+                        <span class="font-bold">{{ posts.length }}</span> posts
+                    </p>
+                    <p class="text-base"
+                    (click)="openFollowers()">
+                        <span class="font-bold">{{ userProfile?.followerCount }}</span> followers
+                    </p>
+                    <p class="text-base"
+                    (click)="openFollowers()">
+                        <span class="font-bold">{{ userProfile?.followingCount }}</span> following
+                    </p>
+                </div>
+    
+                <div class="space-y-1 text-base-content/50">
+                    <p class="font-semibold">{{ userProfile?.name }} {{ userProfile?.surname }}</p>
+                    <p *ngIf="userProfile?.email" class="text-blue-400 hover:underline cursor-pointer text-sm flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H4.5a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5H4.5A2.25 2.25 0 0 0 2.25 6.75m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                        </svg>
+                        <a href="mailto:{{ userProfile?.email }}">{{ userProfile?.email }}</a>
+                    </p>
+                    <span *ngIf="userProfile?.location?.city || userProfile?.location?.country" class="post-location text-sm text-gray-500 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                        </svg>
+                        {{ userProfile?.location?.city }}<span *ngIf="userProfile?.location?.city && userProfile?.location?.country">,</span> {{ userProfile?.location?.country }}
+                    </span>
+                </div>
+    
+            </div>
         </div>
     </div>
+    <div class="max-w-lg mx-auto mt-8 mb-6 text-center">
+        <h3 class="text-2xl font-bold text-neutral-content mb-2">Posts</h3>
+        <p class="text-sm text-gray-500">Checkout all the posts from {{ userProfile?.username }}!</p>
+        <div class="w-24 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
+    </div>
   
-    <div class="post-thumbnails">
+    <!-- <div class="lg:w-3/4 p-6">
+      <h3 class="text-xl font-bold mb-4 text-neutral-content">Posts</h3>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <div *ngFor="let post of posts">
-            <img [src]="'https://images7.memedroid.com/images/UPLOADED412/5fd9180d366ee.jpeg'" alt="Thumbnail" class="post-image" (click)="openPostModal(post)" />
+          <div class="card card-compact bg-base-200 shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer" (click)="openPostModal(post)">
+            <figure class="aspect-w-16 aspect-h-9"> <img [src]="'https://images7.memedroid.com/images/UPLOADED412/5fd9180d366ee.jpeg'" alt="Thumbnail" class="object-cover w-full h-full rounded-t-lg" />
+            </figure>
+            <div class="card-body p-2">
+              <p class="text-xs text-gray-500 truncate">{{ post.description }}</p> </div>
+          </div>
+        </div>
+      </div>
+    </div> -->
+    
+    <!--POSTOVI KORISNIKA-->
+    <div class="flex flex-col post card card-compact lg:card-normal bg-base-100 shadow-xl rounded-box mb-6 w-full max-w-lg p-4" *ngFor="let post of posts">
+        <div class="card-body p-4">
+            <div class="post-header flex justify-between items-center mb-2">
+                <span class="post-user text-lg font-semibold text-primary cursor-pointer" (click)="viewProfile(post.userId)">&commat;{{userProfile?.username}} </span>
+                <span class="post-location text-sm text-gray-500 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                    </svg>
+                    {{post.location.city}}
+                </span>
+            </div>
+            
+            <div class="post-description cursor-pointer text-base mb-4">
+                <p><b (click)="viewProfile(post.userId)" class="post-user text-primary cursor-pointer"></b> {{post.description}}</p>
+            </div>
+    
+            <figure class="post-image cursor-pointer mb-4 rounded-box overflow-hidden">
+                <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" class="w-full h-auto object-cover max-h-96" />
+            </figure>
+            
+            <div class="post-actions flex items-center justify-start gap-4 mb-2 border-t border-base-200 pt-3">
+    
+                <button class="btn btn-ghost btn-sm flex items-center gap-1 hover:bg-red-100 hover:text-red-500 rounded-full group" (click)="toggleLike(post)">
+                    <ng-container *ngIf="post.isLikedByUser">
+    
+                        <svg class="w-5 h-5 text-red-500 transition-all duration-200 ease-in-out group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </ng-container>
+                    <ng-container *ngIf="!post.isLikedByUser">
+    
+                        <svg class="w-5 h-5 text-gray-500 transition-all duration-200 ease-in-out group-hover:text-red-500 group-hover:scale-110" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                    </ng-container>
+                    <span class="text-sm font-medium">{{post.likes}}</span> 
+                </button>
+                
+                <button 
+                    class="btn btn-ghost btn-sm flex items-center gap-1 rounded-full group 
+                           transition-colors duration-200 ease-in-out 
+                           "
+                    [ngClass]="{
+                        'bg-blue-100 text-blue-500': showComments && selectedPost === post,
+                        'hover:bg-blue-100 hover:text-blue-500': !(showComments && selectedPost === post)
+                    }"
+                    (click)="toggleComments(post)">
+    
+                    <svg class="w-5 h-5 transition-all duration-200 ease-in-out group-hover:scale-110" 
+                         [ngClass]="{
+                             'text-blue-500 fill-current': showComments && selectedPost === post,
+                             'text-gray-500 group-hover:text-blue-500': !(showComments && selectedPost === post)
+                         }"
+                         [attr.fill]="(showComments && selectedPost === post) ? 'currentColor' : 'none'"
+                         stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    <span class="text-sm font-medium"
+                          [ngClass]="{
+                              'text-blue-500': showComments && selectedPost === post,
+                              'text-gray-500 group-hover:text-blue-500': !(showComments && selectedPost === post)
+                          }">
+                        {{post.comments.length}}
+                    </span> 
+                </button>
+            </div>
+            
+            <div *ngIf="showComments && selectedPost===post" class="post-comments border-t border-base-200 pt-4 mt-4">
+                <div class="close-comments flex justify-end mb-4">
+                    <button class="btn btn-sm btn-ghost" (click)="closeComments(post)">
+                         
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ml-1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>                          
+                    </button>
+                </div>
+                <div class="comments-list max-h-48 overflow-y-auto mb-4">
+                    <div *ngFor="let comment of post.comments" class="comment p-2 border-b border-base-200 last:border-b-0">
+                        <p><span class="comment-user font-semibold text-secondary cursor-pointer" (click)="viewProfile(comment.userId)">&commat;{{comment.creatorUsername}}</span>: {{comment.text}}</p>
+                    </div>
+                </div>
+                <div class="add-comment flex items-center gap-2">
+                    <input type="text" placeholder="Post your comment..." class="input input-bordered input-sm w-full flex-grow" />
+                    <button (click)="addComment()" class="btn btn-primary btn-sm">Comment</button>
+                </div>
+            </div>
         </div>
     </div>
-  </div>
   
-  <div *ngIf="isPostModalOpen" class="overlay" (click)="closePostModal()"></div>
-    <div *ngIf="isPostModalOpen" class="post-modal">
-        <div class="post-header">
-            <span (click)="viewProfile(selectedPost.userId)">{{ selectedPost.creatorUsername }}</span>
-            <span>{{ selectedPost.location?.city }}</span>
-        </div>
-            <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" class="post-image" />
-        <div class="post-actions">
-            ❤️ {{ selectedPost.likes }} &nbsp; 💬 {{ selectedPost.comments?.length }}
-        </div>
-        <div class="post-description">
-            <p><b>{{ selectedPost.creatorUsername }}</b> {{ selectedPost.description }}</p>
-        </div>
-        <div class="post-comments">
-            <div *ngFor="let comment of selectedPost.comments">
-                <p><b (click)="viewProfile(comment.userId)" style="cursor: pointer;">{{ comment.creatorUsername }}</b>: {{ comment.text }}</p>
+  ---
+
+
+  ---
+  
+  <!-- <dialog [class.modal-open]="isPostModalOpen" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box p-0 max-w-lg">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" (click)="closePostModal()">✕</button>
+      </form>
+  
+      <div *ngIf="selectedPost" class="flex flex-col">
+        <div class="flex items-center gap-3 p-4 border-b border-base-200">
+          <div class="avatar">
+            <div class="w-10 rounded-full">
+              <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="Creator Avatar" />
             </div>
-            <div class="add-comment">
-                <input type="text" placeholder="Add a comment..." />
-                <button (click)="addComment()">Post</button>
-            </div>
+          </div>
+          <div>
+            <span class="font-bold text-neutral-content cursor-pointer hover:underline" (click)="viewProfile(selectedPost.userId)">
+              {{ selectedPost.creatorUsername }}
+            </span>
+            <p class="text-xs text-gray-500">{{ selectedPost.location?.city }}</p>
+          </div>
         </div>
-  </div>
   
-  <div *ngIf="showFollowings" class="overlay" (click)="closeFollowings()"></div>
-  <div *ngIf="showFollowings" class="follow-modal">
-        <div class="modal-header">
-            <h3>Following</h3>
-            <button (click)="closeFollowings()">✖</button>
-        </div>
-        <ul>
-            <li *ngFor="let user of following">
-                <span>{{ user.username }}</span>
-                <span (click)="viewProfile(user.id)" style="cursor: pointer;">View Profile</span>
-            </li>
-        </ul>
-  </div>
+        <img [src]="'https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg'" alt="Post Image" class="w-full object-cover" />
   
-  <div *ngIf="showFollowers" class="overlay" (click)="closeFollowers()"></div>
-  <div *ngIf="showFollowers" class="follow-modal">
-        <div class="modal-header">
-            <h3>Followers</h3>
-            <button (click)="closeFollowers()">✖</button>
+        <div class="flex gap-4 p-4 text-gray-600 text-sm border-b border-base-200">
+          <div class="flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-neutral-content">{{ selectedPost.likes }}</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8 8 0 01-8-7c0-3.866 3.582-7 8-7s8 3.134 8 7zm-8 4a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-neutral-content">{{ selectedPost.comments?.length }}</span>
+          </div>
         </div>
-        <ul>
-            <li *ngFor="let user of followers">
-                <span>{{ user.username }}</span>
-                <span (click)="viewProfile(user.id)" style="cursor: pointer;">View Profile</span>
-            </li>
-        </ul>
-  </div>
+  
+        <div class="p-4 border-b border-base-200">
+          <p class="text-neutral-content"><b class="cursor-pointer hover:underline" (click)="viewProfile(selectedPost.userId)">{{ selectedPost.creatorUsername }}</b> {{ selectedPost.description }}</p>
+        </div>
+  
+        <div class="p-4 max-h-60 overflow-y-auto">
+          <div *ngFor="let comment of selectedPost.comments" class="mb-2">
+            <p class="text-sm text-neutral-content"><b class="cursor-pointer hover:underline" (click)="viewProfile(comment.userId)">{{ comment.creatorUsername }}</b>: {{ comment.text }}</p>
+          </div>
+        </div>
+  
+        <div class="p-4 border-t border-base-200">
+          <div class="flex items-center gap-2">
+            <input type="text" placeholder="Add a comment..." class="input input-bordered input-sm flex-grow" />
+            <button class="btn btn-primary btn-sm" (click)="addComment()">Post</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </dialog> -->
+  
+  ---
+  
+  <dialog [class.modal-open]="showFollowings" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" (click)="closeFollowings()">✕</button>
+      </form>
+      <h3 class="font-bold text-lg mb-4 text-neutral-content">Following</h3>
+      <ul class="space-y-2">
+        <li *ngFor="let user of following" class="flex items-center justify-between p-2 rounded-md hover:bg-base-200">
+          <span class="font-semibold text-neutral-content">{{ user.username }}</span>
+          <button class="btn btn-ghost btn-sm text-primary hover:underline" (click)="viewProfile(user.id); closeFollowings();">View Profile</button>
+        </li>
+        <li *ngIf="following?.length === 0" class="text-center text-gray-500 py-4">No followings yet.</li>
+      </ul>
+    </div>
+  </dialog>
+  
+  ---
+  
+  <dialog [class.modal-open]="showFollowers" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" (click)="closeFollowers()">✕</button>
+      </form>
+      <h3 class="font-bold text-lg mb-4 text-neutral-content">Followers</h3>
+      <ul class="space-y-2">
+        <li *ngFor="let user of followers" class="flex items-center justify-between p-2 rounded-md hover:bg-base-200">
+          <span class="font-semibold text-neutral-content">{{ user.username }}</span>
+          <button class="btn btn-ghost btn-sm text-primary hover:underline" (click)="viewProfile(user.id); closeFollowers();">View Profile</button>
+        </li>
+        <li *ngIf="followers?.length === 0" class="text-center text-gray-500 py-4">No followers yet.</li>
+      </ul>
+    </div>
+  </dialog>

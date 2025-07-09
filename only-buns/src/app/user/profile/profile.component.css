@@ -1,4 +1,4 @@
-
+/* 
 .profile-container {
     max-width: 900px;
     margin: 40px auto;
@@ -192,4 +192,4 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 999;
-  }
+  } 

@@ -15,22 +15,22 @@ import { tap, catchError, switchMap } from 'rxjs/operators'; // Dodaj 'tap', 'ca
   templateUrl: './posts-preview.component.html',
   styleUrl: './posts-preview.component.css'
 })
-export class PostsPreviewComponent implements OnInit{
-  posts: Post[]=[];
-  usernames: {[userId:number]:string}={};
-  showComments=false;
-  selectedPost: any = null;
-  currentUser:User | null={
-    id:0,
-    name: '',
-    surname: '',
-    username: '',
-    email: '',
-    role: {id:0, name:''},
-    location: {id:0,longitude:0,latitude:0,country:'',city:''},
-    postCount: 0,
-    followerCount: 0,
-    followingCount: 0
+  export class PostsPreviewComponent implements OnInit{
+    posts: Post[]=[];
+    usernames: {[userId:number]:string}={};
+    showComments=false;
+    selectedPost: any = null;
+    currentUser:User | null={
+      id:0,
+      name: '',
+      surname: '',
+      username: '',
+      email: '',
+      role: {id:0, name:''},
+      location: {id:0,longitude:0,latitude:0,country:'',city:''},
+      postCount: 0,
+      followerCount: 0,
+      followingCount: 0
   }
 
   // Konstruktor injektuje potrebne servise
@@ -198,4 +198,20 @@ export class PostsPreviewComponent implements OnInit{
     // Koristimo router.navigate da odemo na putanju '/post/:id'
     this.router.navigate(['/post', postId]);
   }
+  // Nova toggleComments metoda
+  toggleComments(post: any) {
+    if (this.showComments && this.selectedPost === post) {
+      // Ako su komentari već otvoreni za ovu objavu, zatvori ih
+      this.showComments = false;
+      this.selectedPost = null;
+    } else {
+      // Inače, otvori komentare za ovu objavu
+      this.showComments = true;
+      this.selectedPost = post;
+    }
+  }
+
+// Možeš zadržati closeComments metodu ako je koristiš negde drugde,
+// ali dugme "Zatvori komentare" sada poziva nju direktno.
+
 }
