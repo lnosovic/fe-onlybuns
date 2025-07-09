@@ -15,7 +15,7 @@ import { map } from 'rxjs';
 export class LoginComponent implements OnInit{
   private access_token = null;
   loginForm = new FormGroup({
-    email: new FormControl('',Validators.required),
+    username: new FormControl('',Validators.required),
     password: new FormControl('',Validators.required)
   })
 
@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit{
         'Content-Type': 'application/json'
       });
       const body = {
-        'email': this.loginForm.value.email,
+        'username': this.loginForm.value.username,
         'password': this.loginForm.value.password
       };
       this.http.post<any>(`http://localhost:8080/auth/login`,body,{headers: loginHeaders        
@@ -53,7 +53,7 @@ export class LoginComponent implements OnInit{
             alert('Too many login attempts. Please wait a minute.');
           }else{
             console.error('Error fetching user:',err);
-            alert('Invalid email or password');
+            alert('Invalid username or password');
           }
         }
       })
