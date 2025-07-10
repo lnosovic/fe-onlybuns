@@ -43,6 +43,10 @@
       class="input input-bordered w-full" />
     <p class="text-red-500 text-sm" *ngIf="submitted && f.email.errors?.['required']">Email is required.</p>
     <p class="text-red-500 text-sm" *ngIf="submitted && f.email.errors?.['email']">Invalid email format.</p>
+    <p class="text-red-500 text-sm"
+    *ngIf="f.email.errors?.['exists'] && (submitted || f.email.touched)">
+    Email in use.
+    </p>
   </div>
 
   <!-- PASSWORD -->
