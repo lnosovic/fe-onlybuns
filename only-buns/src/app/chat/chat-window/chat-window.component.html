@@ -1,0 +1,46 @@
+<div class="card w-80 bg-base-100 shadow-xl border border-base-200">
+    <div class="card-header p-3 bg-primary text-secondary-content flex justify-between items-center rounded-t-xl">
+      <h3 class="card-title text-base font-semibold">{{ chatRoomName }}123</h3>
+      <button class="btn btn-ghost btn-sm" (click)="onClose()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div #scrollContainer class="card-body p-4 h-64 overflow-y-auto flex flex-col">
+      <div *ngFor="let message of messages" 
+           class="chat" 
+           [ngClass]="{ 
+             'chat-end': message.senderId === currentUser.id, 
+             'chat-start': message.senderId !== currentUser.id 
+           }">
+        
+        <!-- Poruka (oblačić) -->
+        <div class="chat-bubble max-w-xs md:max-w-sm lg:max-w-md break-words"
+             [ngClass]="{
+               'chat-bubble-primary': message.senderId !== currentUser.id,
+               'chat-bubble-base': message.senderId === currentUser.id
+             }">
+          {{ message.content }}
+        </div>
+    
+        <!-- Footer: možeš staviti vreme ili ID za test -->
+        <div class="chat-footer text-xs opacity-50 mt-1">
+          ID: {{ message.senderId }}
+        </div>
+      </div>
+    </div>
+  
+    <div class="p-3 border-t border-base-300 flex items-center gap-2">
+      <input type="text"
+             placeholder="Upiši poruku..."
+             class="input input-bordered w-full"
+             [(ngModel)]="messageContent"
+             (keyup.enter)="sendMessage()" />
+      <button class="btn btn-primary btn-sm" (click)="sendMessage()" [disabled]="isSending || !messageContent.trim()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </button>
+    </div>
+  </div>

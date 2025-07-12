@@ -96,32 +96,39 @@
                 <div class="flex items-center gap-4 mb-4">
                     <p class="text-lg font-bold ">&commat;{{ userProfile?.username }}12123</p>
                     <button
-                    *ngIf="currentUser && userProfile && currentUser.id !== userProfile.id"
-                    class="btn btn-sm btn-ghost"
-                    [ngClass]="{
-                        'btn-primary': !checkFollowingStatus(),
-                        'btn-error': checkFollowingStatus() && isHoveringUnfollow,
-                        'text-base-content': checkFollowingStatus() && !isHoveringUnfollow 
-                    }"
-                    (click)="checkFollowingStatus() ? unfollowUser() : followUser()"
-                    (mouseover)="isHoveringUnfollow = true"
-                    (mouseout)="isHoveringUnfollow = false"
-                >
-                    {{ checkFollowingStatus() ? (isHoveringUnfollow ? 'Unfollow' : 'Following') : 'Follow' }}
-                </button>
-                    <button class="btn btn-ghost btn-sm">Message</button>
+                      *ngIf="currentUser && userProfile && currentUser.id !== userProfile.id"
+                      class="btn btn-sm btn-primary"
+                      [ngClass]="{
+                          'btn-primary': !checkFollowingStatus(),
+                          'btn-error': checkFollowingStatus() && isHoveringUnfollow,
+                          'text-base-content': checkFollowingStatus() && !isHoveringUnfollow 
+                      }"
+                      (click)="checkFollowingStatus() ? unfollowUser() : followUser()"
+                      (mouseover)="isHoveringUnfollow = true"
+                      (mouseout)="isHoveringUnfollow = false"
+                    >
+                      {{ checkFollowingStatus() ? (isHoveringUnfollow ? 'Unfollow' : 'Following') : 'Follow' }}
+                    </button>
+                    <button
+                      *ngIf="!isMyProfile()"
+                      class="btn btn-ghost btn-sm "
+                      (click)="createPersonalChat()">Message</button>
+                    <button
+                    *ngIf="isMyProfile()"
+                    class="btn btn-primary btn-sm ">Edit
+                    </button>
                 </div>
     
                 <div class="flex text-base-content items-center gap-8 mb-4">
                     <p class="text-base">
                         <span class="font-bold">{{ posts.length }}</span> posts
                     </p>
-                    <p class="text-base"
+                    <p class="text-base cursor-pointer"
                     (click)="openFollowers()">
                         <span class="font-bold">{{ userProfile?.followerCount }}</span> followers
                     </p>
-                    <p class="text-base"
-                    (click)="openFollowers()">
+                    <p class="text-base cursor-pointer"
+                    (click)="openFollowings()">
                         <span class="font-bold">{{ userProfile?.followingCount }}</span> following
                     </p>
                 </div>
@@ -147,8 +154,9 @@
         </div>
     </div>
     <div class="max-w-lg mx-auto mt-8 mb-6 text-center">
-        <h3 class="text-2xl font-bold text-neutral-content mb-2">Posts</h3>
-        <p class="text-sm text-gray-500">Checkout all the posts from {{ userProfile?.username }}!</p>
+        <h3 class="text-2xl font-bold text-neutral-content mb-2"></h3>
+        <p class="text-sm text-gray-500"> </p>              
+        <!-- {{ userProfile?.username }}! -->
         <div class="w-24 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
     </div>
   
@@ -322,7 +330,7 @@
   
   ---
   
-  <dialog [class.modal-open]="showFollowings" class="modal modal-bottom sm:modal-middle">
+  <dialog [class.modal-open]="showFollowings" class="modal modal-bottom sm:modal-middle"  (click)="onBackdropClick($event, 'followings')">
     <div class="modal-box">
       <form method="dialog">
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" (click)="closeFollowings()">✕</button>
@@ -340,7 +348,7 @@
   
   ---
   
-  <dialog [class.modal-open]="showFollowers" class="modal modal-bottom sm:modal-middle">
+  <dialog [class.modal-open]="showFollowers" class="modal modal-bottom sm:modal-middle"  (click)="onBackdropClick($event, 'followers')">
     <div class="modal-box">
       <form method="dialog">
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" (click)="closeFollowers()">✕</button>
