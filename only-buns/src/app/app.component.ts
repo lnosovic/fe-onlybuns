@@ -1,12 +1,13 @@
 // src/app/app.component.ts
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common'; // <-- OBAVEZNO ZA *ngFor
 import { NavbarComponent } from './layout/navbar/navbar.component';
 import { ChatWidgetComponent } from './chat/chat-widget/chat-widget.component';
 import { ChatWindowComponent } from './chat/chat-window/chat-window.component';
 import { AuthService } from './user/auth.service';
+import { ChatUiService } from './chat/chat.ui.service';
 
 // Interfejs za otvoren prozor chata - SA pozicionim podacima
 interface OpenChatWindow {
@@ -29,7 +30,7 @@ interface OpenChatWindow {
     NavbarComponent
   ],
 })
-export class AppComponent {
+export class AppComponent implements OnInit{
   title = 'only-buns';
 
   openChatWindows: OpenChatWindow[] = [];
@@ -40,36 +41,45 @@ export class AppComponent {
   chatWidgetWidth = 320; // Širina glavnog chat widgeta (da bi se chat prozori pozicionirali pored njega)
   initialRightOffset = 16; // bottom-4 right-4 na glavnom widgetu, da bi se prvi prozor postavio desno od njega
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private chatUi: ChatUiService) { }
+
+  ngOnInit() {
+    this.chatUi.openWindows$.subscribe(ws => (this.openChatWindows = ws));
+  }
 
   /**
    * Called when ChatWidgetComponent emits an 'openChatRoom' event.
    * Opens a new chat window or focuses on an existing one.
    */
   handleOpenChatRoom(event: { id: number, name: string }): void {
-    const existingWindow = this.openChatWindows.find(w => w.id === event.id);
+    // const existingWindow = this.openChatWindows.find(w => w.id === event.id);
 
-    if (!existingWindow) {
-      const newWindow: OpenChatWindow = {
-        id: event.id,
-        name: event.name,
-        position: {
-          // Izračunavamo 'right' poziciju:
-          // Inicijalni razmak od desne ivice (npr. 16px)
-          // + širina glavnog chat widgeta (320px)
-          // + razmak između widgeta i prvog prozora (16px)
-          // + indeks trenutnog prozora * (širina prozora + razmak između prozora)
-          right: this.initialRightOffset + this.chatWidgetWidth + this.windowSpacing +
-                 (this.openChatWindows.length * (this.windowWidth + this.windowSpacing)),
-          bottom: this.initialRightOffset // Ista 'bottom' pozicija kao widget
-        }
-      };
-      this.openChatWindows.push(newWindow);
-      console.log('Opened new chat window:', newWindow);
-    } else {
-      console.log('Chat window already open:', existingWindow.name);
-      // Opciono: Možeš ovde da implementiraš logiku za pomeranje postojećeg prozora na vrh z-indexa
-    }
+    // if (!existingWindow) {
+    //   const newWindow: OpenChatWindow = {
+    //     id: event.id,
+    //     name: event.name,
+    //     position: {
+    //       // Izračunavamo 'right' poziciju:
+    //       // Inicijalni razmak od desne ivice (npr. 16px)
+    //       // + širina glavnog chat widgeta (320px)
+    //       // + razmak između widgeta i prvog prozora (16px)
+    //       // + indeks trenutnog prozora * (širina prozora + razmak između prozora)
+    //       right: this.initialRightOffset + this.chatWidgetWidth + this.windowSpacing +
+    //              (this.openChatWindows.length * (this.windowWidth + this.windowSpacing)),
+    //       bottom: this.initialRightOffset // Ista 'bottom' pozicija kao widget
+    //     }
+    //   };
+    //   this.openChatWindows.push(newWindow);
+    //   console.log('Opened new chat window:', newWindow);
+    // } else {
+    //   console.log('Chat window already open:', existingWindow.name);
+    //   // Opciono: Možeš ovde da implementiraš logiku za pomeranje postojećeg prozora na vrh z-indexa
+    // }
+    const chatRoom = {
+      id: event.id,
+      name: event.name ?? 'Chat'
+    };
+    this.chatUi.openWindow(chatRoom)
   }
 
   isAuthenticated(){
@@ -80,11 +90,15 @@ export class AppComponent {
    * Closes a specific chat window.
    * @param chatRoomId The ID of the chat room to close.
    */
-  handleCloseChatWindow(chatRoomId: number): void {
-    this.openChatWindows = this.openChatWindows.filter(w => w.id !== chatRoomId);
-    // Prilagodi pozicije preostalih prozora nakon zatvaranja
-    this.repositionChatWindows();
-    console.log(`Closed chat window: ${chatRoomId}`);
+  // handleCloseChatWindow(chatRoomId: number): void {
+  //   this.openChatWindows = this.openChatWindows.filter(w => w.id !== chatRoomId);
+  //   // Prilagodi pozicije preostalih prozora nakon zatvaranja
+  //   this.repositionChatWindows();
+  //   console.log(`Closed chat window: ${chatRoomId}`);
+  // }
+
+  handleCloseChatWindow(roomId: number) {
+    this.chatUi.closeWindow(roomId);
   }
 
   // Funkcija za prepozicioniranje prozora nakon zatvaranja

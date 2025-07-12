@@ -2,10 +2,12 @@
 
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { catchError, firstValueFrom, Observable, of, tap } from 'rxjs';
+import { catchError, firstValueFrom, Observable, of, Subscription, tap } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { User } from '../../user/models/user.model';
 import { ChatService } from '../chat.service';
+import { ChatUiService } from '../chat.ui.service';
+import { ChatRoom } from '../chat.model';
 
 
 @Component({
@@ -18,18 +20,21 @@ import { ChatService } from '../chat.service';
   styleUrls: ['./chat-widget.component.css']
 })
 export class ChatWidgetComponent implements OnInit {
+  private chatRoomsSub?: Subscription;
 
   isWidgetOpen: boolean = false;
   // Neće više imati activeChatRoomId/Name ovde, već će emitovati događaj
   @Output() openChatRoom = new EventEmitter<{ id: number, name: string }>();
 
   // Placeholder za tvoje recent chatove
-  recentChats = [
-    { id: 1, name: 'Grupa A', lastMessage: 'Poslednja poruka...' },
-    { id: 2, name: 'Marko Marković', lastMessage: 'Ok, vidimo se.' },
-    { id: 3, name: 'Jelena Petrović', lastMessage: 'Super ideja!' },
-    { id: 4, name: 'Podrška', lastMessage: 'Imamo rešenje za vaš problem.' },
-  ];
+  // recentChats = [
+  //   { id: 1, name: 'Grupa A', lastMessage: 'Poslednja poruka...' },
+  //   { id: 2, name: 'Marko Marković', lastMessage: 'Ok, vidimo se.' },
+  //   { id: 3, name: 'Jelena Petrović', lastMessage: 'Super ideja!' },
+  //   { id: 4, name: 'Podrška', lastMessage: 'Imamo rešenje za vaš problem.' },
+  // ];
+  recentChats : ChatRoom[] = [];
+  private sub?: Subscription;
   currentUser:User | null={
     id:0,
     name: '',
@@ -43,16 +48,27 @@ export class ChatWidgetComponent implements OnInit {
     followingCount: 0
   }
 
-  constructor(private http:HttpClient, private chatService: ChatService) { }
+  constructor(private http:HttpClient, private chatService: ChatService, private chatUi: ChatUiService) { }
 
   ngOnInit(): void {
-    console.log('cw comp');
-    this.loadCurrentUser().then(()=>{
-      this.chatService.getMyChatRooms();
-      console.log(this.chatService.getMyChatRooms().forEach(e => console.log(e)));
-      this.loadRecentChats();
+    //this.chatUi.openWindows$.subscribe(ws => (this.openChatWindows = ws));
+
+    // console.log('cw comp');
+    // this.loadCurrentUser().then(()=>{
+    //   this.chatService.getMyChatRooms();
+    //   console.log(this.chatService.getMyChatRooms().forEach(e => console.log(e)));
+       //this.loadRecentChats();
+    // });
+
+    this.sub = this.chatService.getMyChatRoomsObservable()
+    .subscribe(rooms => {
+      this.recentChats = rooms;
+      console.log('Recent chats updated:', rooms);
     });
 
+    // Po inicijalnom loadu, osveži sobe
+    this.chatService.refreshMyChatRooms();
+    
    }
 
 
@@ -84,13 +100,26 @@ export class ChatWidgetComponent implements OnInit {
   
     this.chatService.getMyChatRooms().subscribe({
       next: (chatRooms) => {
-        this.recentChats = chatRooms.map(room => ({ id: room.id,  name: 'Grupa A', lastMessage: 'Poslednja poruka...'  }));
+        //this.recentChats = chatRooms.map(room => ({ id: room.id,  name: 'Grupa A', lastMessage: 'Poslednja poruka...'  }));
         console.log('Recent chats:', this.recentChats);
       },
       error: (err) => {
         console.error('Greška pri učitavanju chat soba:', err);
       }
     });
+    // this.chatService.myChatRooms$.subscribe(rooms => {
+    //   this.recentChats = rooms.map(room => ({
+    //     id: room.id,
+    //     name: room.name ?? 'Nema imena',
+    //     lastMessage: '...' // možeš dodati i logiku za poslednju poruku
+    //   }));
+    // });
+  }
+  getChatName(room: ChatRoom){
+    if (room.name){
+      return room.name;
+    }
+    return room.participants.find(p => p.id !== this.currentUser?.id)?.username ?? 'Nepoznat';
   }
 
   // Sada emitujemo događaj roditelju

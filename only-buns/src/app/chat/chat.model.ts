@@ -1,4 +1,3 @@
-// src/app/chat/chat.model.ts
 
 export interface ChatRoom {
     id: number;

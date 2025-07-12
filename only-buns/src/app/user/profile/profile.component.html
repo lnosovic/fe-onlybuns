@@ -94,7 +94,7 @@
     
             <div class="flex-grow flex flex-col pt-2">
                 <div class="flex items-center gap-4 mb-4">
-                    <p class="text-lg font-bold ">&commat;{{ userProfile?.username }}12123</p>
+                    <p class="text-lg font-bold ">&commat;{{ userProfile?.username }}</p>
                     <button
                       *ngIf="currentUser && userProfile && currentUser.id !== userProfile.id"
                       class="btn btn-sm btn-primary"
@@ -112,7 +112,7 @@
                     <button
                       *ngIf="!isMyProfile()"
                       class="btn btn-ghost btn-sm "
-                      (click)="createPersonalChat()">Message</button>
+                      (click)="startConversation()">Message</button>
                     <button
                     *ngIf="isMyProfile()"
                     class="btn btn-primary btn-sm ">Edit

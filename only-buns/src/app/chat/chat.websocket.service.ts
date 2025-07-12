@@ -12,6 +12,8 @@ export class ChatWebSocketService {
     private messagesSubjects: Map<number, BehaviorSubject<ChatMessageResponseDTO[]>> = new Map();
     private subscriptions: Map<number, StompSubscription> = new Map();
 
+    private newChatSubject = new BehaviorSubject<{ id: number; name: string } | null>(null);
+    public newChat$ = this.newChatSubject.asObservable();
 
     private connectionPromise!: Promise<void>;
     private connectionResolver!: () => void;
@@ -23,6 +25,7 @@ export class ChatWebSocketService {
     
     this.connectionPromise = new Promise((resolve) => {
         this.connectionResolver = resolve;
+        
       });
 
     this.client = new Client({
@@ -38,6 +41,11 @@ export class ChatWebSocketService {
         onConnect: () => {
           console.log('STOMP connected');
           this.connectionResolver();
+          this.client.subscribe('/topic/new-chat', (message: IMessage) => {
+            const body = JSON.parse(message.body) as { id: number; name: string | null };
+            console.log('🔔 Novi chat otvoren:', body);
+            this.newChatSubject.next({ id: body.id, name: body.name ?? 'New Chat' });
+          });
         },
         onStompError: (frame) => {
             console.error('Broker reported error: ' + frame.headers['message']);

@@ -7,9 +7,11 @@ import { ChatService } from '../chat.service';
 import { ChatMessageDTO, ChatMessageResponseDTO } from '../chat.model';
 import { User } from '../../user/models/user.model';
 import { AuthService } from '../../user/auth.service';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom, forkJoin, Subscription } from 'rxjs';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { ChatWebSocketService } from '../chat.websocket.service';
+import { UserService } from '../../user/user.service';
+import { ChatUiService } from '../chat.ui.service';
 
 @Component({
   selector: 'app-chat-window',
@@ -32,14 +34,23 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   currentUser!: User; // definisan, ali će se učitati async
   messageContent: string = '';
   messages: ChatMessageResponseDTO[] = [];
-
+  
   private messagesSub?: Subscription;
+
+  isGroup = false;
+  showMemberModal = false;
+
+  userSearch = '';
+  searchResults: User[] = [];
+  currentMembers: User[] = [];
 
   constructor(
     private chatWebSocketService: ChatWebSocketService,
     private chatService: ChatService,
     private authService: AuthService,
-    private http: HttpClient
+    private http: HttpClient,
+    private userService: UserService,
+    private chatUi: ChatUiService
   ) {}
 
   async ngOnInit() {
@@ -67,8 +78,22 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       });
     await this.loadCurrentUser();
     await this.loadMessages(this.chatRoomId);
+    await this.loadParticipants();
   }
-
+  async loadParticipants() {
+    this.chatService.getParticipants(this.chatRoomId).subscribe({
+      next: (users) => {
+        this.currentMembers = users;
+        if(this.currentMembers.length>2){
+          this.isGroup = true;
+        }
+      },
+      error: (err) => {
+        console.error('Greška pri učitavanju članova:', err);
+        this.currentMembers = [];
+      }
+    });
+  }
   async loadCurrentUser():Promise<void>{
     console.log('deez');
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -187,6 +212,90 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     }, 0); // timeout osigurava da Angular prvo renderuje poruke
   }
 
+  openMemberManager() {
+    //this.currentMembers = [...this.chatRoom.participants];
+    this.showMemberModal = true;
+  }
+  
+  closeMemberManager() {
+    this.showMemberModal = false;
+    this.userSearch = '';
+    this.searchResults = [];
+  }
+  
+  searchUsers() {
+    if (this.userSearch.trim().length < 2) {
+      this.searchResults = [];
+      return;
+    }
+    this.userService.searchUsersByUsername(this.userSearch.trim()).subscribe({
+      next: (users) => {
+        this.searchResults = users;
+      },
+      error: () => {
+        this.searchResults = [];
+      }
+    });
+  }
+  
+  addUser(user: User) {
+    this.currentMembers.push(user);
+   }
+  removeUser(user: User) { /* pozovi servis, updateuj currentMembers */ }
+
+
+
+
+  createGroupChat() {
+    this.chatService.createGroupChat('nev').subscribe({
+      next: (newGroup) => {
+        console.log('Kreirana grupa:', newGroup);
+  
+        // Uzmi sve članove osim trenutnog korisnika
+        const membersToAdd = this.currentMembers.filter(member => member.id !== this.currentUser.id);
+  
+        // Za svaki član pozovi addUserToGroup (napravi niz observabla)
+        const addUserObservables = membersToAdd.map(member =>
+          this.chatService.addUserToGroup(newGroup.id, member.id)
+        );
+  
+        // Sačekaj da se svi pozivi završe
+        forkJoin(addUserObservables).subscribe({
+          next: (results) => {
+            console.log('Svi korisnici dodati u grupu:', results);
+            this.chatService.refreshMyChatRooms();
+            const sub = this.chatService.refreshCompleted.subscribe(() => {
+              this.closeMemberManager();
+              const windowToOpen = {
+                id: newGroup.id,
+                name: newGroup.name || 'New Chat Group'
+              }
+              this.chatUi.openWindow(windowToOpen);
+              sub.unsubscribe(); // da ne curi memorija
+            });
+          },
+          error: (err) => {
+            console.error('Greška pri dodavanju članova:', err);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Greška pri kreiranju grupe:', err);
+      }
+    });
+  }
+
+
+
+
+
+
+
+
+
+
+
+
   onClose() {
     this.closeWindow.emit(this.chatRoomId);
   }
@@ -196,4 +305,15 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.messagesSub?.unsubscribe();
     this.chatWebSocketService.unsubscribeFromRoom(this.chatRoomId);
   }
+
+
+
+
+
+
+
+
+
+
+
 }

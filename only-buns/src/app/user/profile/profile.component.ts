@@ -7,6 +7,7 @@ import { Post } from '../../post/models/post.model';
 import { PostService } from '../../post/post.service';
 import { ChatService } from '../../chat/chat.service';
 import { firstValueFrom } from 'rxjs';
+import { ChatUiService } from '../../chat/chat.ui.service';
 
 @Component({
   selector: 'app-profile',
@@ -41,7 +42,9 @@ export class ProfileComponent implements OnInit {
   showComments=false;
   isHoveringUnfollow = false;
   
-  constructor(private http:HttpClient,private activeRouter:ActivatedRoute,private router:Router, private postService: PostService, private chatService: ChatService){}
+  constructor(private http:HttpClient,private activeRouter:ActivatedRoute,private router:Router, private postService: PostService, private chatService: ChatService,
+    private chatUi: ChatUiService
+  ){}
   ngOnInit(): void {
     this.activeRouter.params.subscribe(async params => {
 
@@ -338,6 +341,27 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  startConversation() {
+    if (!this.userProfile || !this.userProfile.id) {
+      console.error('Greška: ID korisničkog profila nije dostupan.');
+      return;
+    }
+  
+    const otherUserId = this.userProfile.id;
+  
+  
+    this.chatService.createPersonalChat(otherUserId).subscribe(room => {
+      const chatRoom = {
+        id: room.id,
+        name: room.name ?? 'Chat'
+      };
+      this.chatUi.openWindow(chatRoom);
+    }, err => {
+      console.error('Neuspeh pri kreiranju četa:', err);
+      // prikazati toast ako želiš
+    });
+      
+  }
   async checkInitialLikeStatus(): Promise<void> {
     // if (!this.currentUser || this.currentUser.id === 0) { // Ako currentUser nije učitan ili je ID 0, preskoči
     //     console.warn("Korisnik nije ulogovan ili currentUser.id je 0. Ne mogu proveriti status lajkova.");

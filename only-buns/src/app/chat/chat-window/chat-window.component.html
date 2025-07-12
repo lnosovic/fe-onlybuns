@@ -1,12 +1,37 @@
 <div class="card w-80 bg-base-100 shadow-xl border border-base-200">
-    <div class="card-header p-3 bg-primary text-secondary-content flex justify-between items-center rounded-t-xl">
-      <h3 class="card-title text-base font-semibold">{{ chatRoomName }}123</h3>
+  <div class="card-header p-3 bg-primary text-secondary-content flex justify-between items-center rounded-t-xl">
+    <h3 class="card-title text-base font-semibold truncate">{{ chatRoomName }}</h3>
+  
+    <div class="flex items-center gap-1">
+      <!-- Dropdown meni -->
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-sm p-1">
+          <!-- three‑dots icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM12 13a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM12 21a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
+          </svg>
+        </div>
+        <ul tabindex="0" class="menu dropdown-content z-[100] p-2 shadow bg-base-100 rounded-box w-48 space-y-1">
+          <li *ngIf="!isGroup">
+            <a (click)="openMemberManager()" class="text-black">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M18 9v3m0 0v3m0-3h3m-3 0h-3M15 6a3 3 0 11-6 0 3 3 0 016 0zM6 18v-1a4 4 0 014-4h0a4 4 0 014 4v1" />
+              </svg>
+              <p>Create group chat</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+  
+      <!-- Close dugme -->
       <button class="btn btn-ghost btn-sm" (click)="onClose()">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
+  </div>
     <div #scrollContainer class="card-body p-4 h-64 overflow-y-auto flex flex-col">
       <div *ngFor="let message of messages" 
            class="chat" 
@@ -44,3 +69,67 @@
       </button>
     </div>
   </div>
+
+
+  <!-- ──◆ Manage‑Members Modal ◆──────────────────────────────────────── -->
+<input type="checkbox" id="member-modal" class="modal-toggle" [(ngModel)]="showMemberModal" />
+<div class="modal" *ngIf="showMemberModal">
+  <label class="modal-backdrop" for="member-modal"></label>
+  <div class="modal-box w-11/12 max-w-3xl">
+    <h3 *ngIf="isGroup" class="font-bold text-lg mb-4">Manage chat members</h3>
+
+    <!-- Two‑column layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- LEFT ─ Search & Add -->
+      <div>
+        <label class="input input-bordered flex items-center gap-2 mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 19a8 8 0 100-16 8 8 0 000 16zm7-1l4 4" />
+          </svg>
+          <input type="text" class="grow" placeholder="Search users…"
+                 [(ngModel)]="userSearch"
+                 (input)="searchUsers()" />
+        </label>
+
+        <ul class="menu bg-base-100 rounded-box max-h-56 overflow-y-auto">
+          <li *ngFor="let user of searchResults">
+            <a (click)="addUser(user)">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" class="w-6 h-6 rounded-full" />
+              <span class="flex-1">{{ user.username }}</span>
+              <span class="badge badge-sm badge-primary">Add</span>
+            </a>
+          </li>
+          <li *ngIf="searchResults.length === 0" class="disabled opacity-50 justify-center">No users</li>
+        </ul>
+      </div>
+
+      <!-- RIGHT ─ Current members -->
+      <div>
+        <h4 class="font-semibold mb-2">Current members</h4>
+        <ul class="menu bg-base-100 rounded-box max-h-64 overflow-y-auto">
+          <li *ngFor="let member of currentMembers">
+            <a>
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" class="w-6 h-6 rounded-full" />
+              <span class="flex-1">{{ member.username }}</span>
+              <span *ngIf="member.id !== currentUser.id"
+                    class="badge badge-sm badge-error cursor-pointer"
+                    (click)="removeUser(member)">
+                Remove
+              </span>
+              <span *ngIf="member.id === currentUser.id"
+                    class="badge badge-sm badge-ghost">You</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- modal actions -->
+    <div class="modal-action flex justify-end gap-2">
+      <button class="btn" (click)="createGroupChat()">Create</button>
+      <button class="btn" (click)="closeMemberManager()">Close</button>
+    </div>
+
+  </div>
+</div>

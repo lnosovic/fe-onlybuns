@@ -4,9 +4,11 @@
 <app-chat-widget *ngIf="isAuthenticated()" (openChatRoom)="handleOpenChatRoom($event)"></app-chat-widget>
 
 <app-chat-window
-  *ngFor="let window of openChatWindows"
-  [chatRoomId]="window.id"
-  [chatRoomName]="window.name"
-  [style.right.px]="window.position.right"  [style.bottom.px]="window.position.bottom" (closeWindow)="handleCloseChatWindow($event)"
-  class="fixed z-40"
-></app-chat-window>
+  *ngFor="let w of openChatWindows"
+  [chatRoomId]="w.id"
+  [chatRoomName]="w.name"
+  [style.right.px]="w.position.right"
+  [style.bottom.px]="w.position.bottom"
+  (closeWindow)="handleCloseChatWindow($event)"
+  class="fixed z-40">
+</app-chat-window>

@@ -1,4 +1,4 @@
-<div class="fixed bottom-4 right-4 z-50">
+<div class="fixed bottom-4 right-4 z-40">
     <div class="chat-widget card w-80 bg-base-100 shadow-xl border border-base-200">
       <div class="card-header p-4 bg-primary text-primary-content flex justify-between items-center rounded-t-xl cursor-pointer"
            (click)="toggleWidget()">
@@ -22,23 +22,31 @@
            [class.opacity-0]="!isWidgetOpen"
            [class.opacity-100]="isWidgetOpen">
   
-        <div class="recent-chats flex flex-col h-full bg-base-200 overflow-y-auto">
-          <h3 class="text-lg font-semibold p-4 border-b border-base-300">Recent Chats</h3>
-          <div class="flex-grow">
-            <div *ngFor="let chat of recentChats"
-                 class="p-3 border-b border-base-300 cursor-pointer hover:bg-base-300 flex items-center"
-                 (click)="onOpenChat(chat.id, chat.name)">
-              <div class="avatar placeholder mr-3">
-                <div class="bg-neutral text-neutral-content rounded-full w-10">
-                  <span class="text-sm">{{ chat.name | slice:0:2 | uppercase }}</span> </div>
-              </div>
-              <div>
-                <p class="font-bold">{{ chat.name }}</p>
-                <p class="text-sm text-gray-500">{{ chat.lastMessage }}</p>
+           <div class="recent-chats flex flex-col h-full bg-base-200 overflow-y-auto">
+            <h3 class="text-lg font-semibold p-4 border-b border-base-300">Recent Chats</h3>
+          
+            <div class="flex-grow">
+              <div *ngFor="let chat of recentChats"
+                   class="p-4 border-b border-base-300 cursor-pointer hover:bg-base-300 flex items-center gap-4"
+                   (click)="onOpenChat(chat.id, chat.name || 'chat')">
+                   
+                <!-- Avatar slika -->
+                <div class="avatar">
+                  <div class="w-12 h-12 rounded-full  overflow-hidden">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" alt="Chat Avatar" />
+                  </div>
+                </div>
+          
+                <!-- Ime chata -->
+                <div>
+                  <p class="font-semibold text-base text-base-content">{{ chat.name }}</p>
+                  <!-- Ako budeš dodavao poruku ispod ili vreme, možeš ovde -->
+                  <!-- <p class="text-sm text-gray-500">Last message...</p> -->
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        
       </div>
     </div>
   </div>
