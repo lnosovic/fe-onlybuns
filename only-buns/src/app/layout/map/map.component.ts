@@ -18,6 +18,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   @Input() longitude? : number;
   @Input() latitude? : number;
   @Input() reset: boolean = false;
+  @Input() initialLocation: Location | null = null;
   location: Location | null = null;
   address: string = '';
   constructor(private http: HttpClient) {}
@@ -47,10 +48,17 @@ export class MapComponent implements AfterViewInit, OnChanges {
     });
     L.Marker.prototype.options.icon = DefaultIcon;
     this.initMap();
+    if (this.initialLocation) {
+    this.setInitialMarker(this.initialLocation);
+    }
   }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['reset'] && changes['reset'].currentValue === true) {
       this.clearMarker();
+    }
+    
+    if (changes['initialLocation'] && this.map && changes['initialLocation'].currentValue) {
+      this.setInitialMarker(changes['initialLocation'].currentValue);
     }
   }
 
@@ -97,5 +105,17 @@ export class MapComponent implements AfterViewInit, OnChanges {
     return this.http.get(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`
     );
+  }
+  setInitialMarker(location: Location): void {
+    if (!this.map) return;
+
+    if (this.currentMarker) {
+      this.map.removeLayer(this.currentMarker);
+    }
+
+    this.currentMarker = L.marker([location.latitude, location.longitude])
+      .addTo(this.map)
+
+    this.map.setView([location.latitude, location.longitude], 13); // centriraj mapu
   }
 }

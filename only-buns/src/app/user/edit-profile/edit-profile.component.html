@@ -1,0 +1,72 @@
+<form [formGroup]="editForm" class="p-8 space-y-4 max-w-xl mx-auto bg-white dark:bg-base-200 shadow-2xl rounded-xl">
+    <h2 class="text-2xl font-bold text-center mb-4">Edit profile</h2>
+  <!-- NAME -->
+  <div>
+    <label class="label">
+      <span class="label-text">Name</span>
+    </label>
+    <input type="text" formControlName="name" placeholder="Enter your name"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.name.errors?.['required']">Name is required.</p>
+  </div>
+
+  <!-- SURNAME -->
+  <div>
+    <label class="label">
+      <span class="label-text">Surname</span>
+    </label>
+    <input type="text" formControlName="surname" placeholder="Enter your surname"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.surname.errors?.['required']">Surname is required.</p>
+  </div>
+
+  <!-- PASSWORD -->
+  <div>
+    <label class="label">
+      <span class="label-text">Password</span>
+    </label>
+    <input type="password" formControlName="password" placeholder="Enter your password"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.password.errors?.['required']">Password is required.</p>
+  </div>
+
+  <!-- CONFIRM PASSWORD -->
+  <div>
+    <label class="label">
+      <span class="label-text">Confirm Password</span>
+    </label>
+    <input type="password" formControlName="confirmPassword" placeholder="Confirm your password"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.confirmPassword.errors?.['required']">Confirmation is required.</p>
+    <p class="text-red-500 text-sm"
+    *ngIf="submitted && editForm.hasError('mismatch') && f.confirmPassword.dirty && f.confirmPassword.touched">
+    Passwords do not match.
+    </p>
+  </div>
+
+  <!-- LOCATION INFO -->
+  <div class="grid grid-cols-2 gap-4" *ngIf="SelectedLocation">
+    <div>
+      <label class="label-text">City:</label>
+      <input type="text" [value]="SelectedLocation.city" readonly class="input input-bordered w-full" />
+    </div>
+    <div>
+      <label class="label-text">Country:</label>
+      <input type="text" [value]="SelectedLocation.country" readonly class="input input-bordered w-full" />
+    </div>
+  </div>
+
+  <!-- MAP COMPONENT -->
+  <app-map (locationSelected)="onLocationSelected($event)" [reset]="mapResetTrigger" [initialLocation]="SelectedLocation"></app-map>
+  <p class="text-red-500 text-sm" *ngIf="submitted && !SelectedLocation">Please select your location on the map.</p>
+
+  <!-- SUBMIT -->
+  <div class="form-control mt-6">
+    <button 
+        type="submit" 
+        class="btn btn-outline btn-primary w-full" 
+         (click)="editUser()">
+        Edit
+    </button>
+</div>
+</form>
