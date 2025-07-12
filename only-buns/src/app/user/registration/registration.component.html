@@ -1,42 +1,101 @@
-<form [formGroup]="registrationForm" class="registration-form">
-    <div class="form-container">
-        <div class="form-group">
-            <label for="name">Name:</label>
-            <input id="name" formControlName="name" type="text" placeholder="Enter your name"/>
-        </div>
-        <div class="form-group">
-            <label for="surname">Surname:</label>
-            <input id="surname" formControlName="surname" type="text" placeholder="Enter your surname"/>
-        </div>
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input id="username" formControlName="username" type="text" placeholder="Enter your username"/>
-        </div>
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input id="email" formControlName="email" type="text" placeholder="Enter your email"/>
-        </div>
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input id="password" formControlName="password" type="password" placeholder="Enter your password" />
-        </div>
-        <div class="form-group">
-            <label for="confirmPassword">Confirm Password:</label>
-            <input id="confirmPassword" formControlName="confirmPassword" type="password" placeholder="Confirm your password"/>
-        </div>
-        <div class="form-group location-row" *ngIf="SelectedLocation">
-        <div class="location-field">
-            <label>City:</label>
-            <input type="text" [value]="SelectedLocation.city" readonly />
-        </div>
-        <div class="location-field">
-            <label>Country:</label>
-            <input type="text" [value]="SelectedLocation.country" readonly />
-        </div>
-        </div>
-        <app-map (locationSelected)="onLocationSelected($event)" [reset]="mapResetTrigger"></app-map>
-        <div class="form-actions">
-            <button  type="submit" [disabled]="registrationForm.invalid || !SelectedLocation" (click)="registerUser()">Sign Up</button>
-        </div>
+<form [formGroup]="registrationForm" class="p-8 space-y-4 max-w-xl mx-auto bg-white dark:bg-base-200 shadow-2xl rounded-xl">
+    <h2 class="text-2xl font-bold text-center mb-4">Sign Up</h2>
+  <!-- NAME -->
+  <div>
+    <label class="label">
+      <span class="label-text">Name</span>
+    </label>
+    <input type="text" formControlName="name" placeholder="Enter your name"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.name.errors?.['required']">Name is required.</p>
+  </div>
+
+  <!-- SURNAME -->
+  <div>
+    <label class="label">
+      <span class="label-text">Surname</span>
+    </label>
+    <input type="text" formControlName="surname" placeholder="Enter your surname"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.surname.errors?.['required']">Surname is required.</p>
+  </div>
+
+  <!-- USERNAME -->
+  <div>
+    <label class="label">
+      <span class="label-text">Username</span>
+    </label>
+    <input type="text" formControlName="username" placeholder="Enter your username"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.username.errors?.['required']">Username is required.</p>
+    <p class="text-red-500 text-sm"
+    *ngIf="f.username.errors?.['exists'] && (submitted || f.username.touched)">
+    Username already exists.
+    </p>
+  </div>
+
+  <!-- EMAIL -->
+  <div>
+    <label class="label">
+      <span class="label-text">Email</span>
+    </label>
+    <input type="email" formControlName="email" placeholder="Enter your email"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.email.errors?.['required']">Email is required.</p>
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.email.errors?.['email']">Invalid email format.</p>
+    <p class="text-red-500 text-sm"
+    *ngIf="f.email.errors?.['exists'] && (submitted || f.email.touched)">
+    Email in use.
+    </p>
+  </div>
+
+  <!-- PASSWORD -->
+  <div>
+    <label class="label">
+      <span class="label-text">Password</span>
+    </label>
+    <input type="password" formControlName="password" placeholder="Enter your password"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.password.errors?.['required']">Password is required.</p>
+  </div>
+
+  <!-- CONFIRM PASSWORD -->
+  <div>
+    <label class="label">
+      <span class="label-text">Confirm Password</span>
+    </label>
+    <input type="password" formControlName="confirmPassword" placeholder="Confirm your password"
+      class="input input-bordered w-full" />
+    <p class="text-red-500 text-sm" *ngIf="submitted && f.confirmPassword.errors?.['required']">Confirmation is required.</p>
+    <p class="text-red-500 text-sm"
+    *ngIf="submitted && registrationForm.hasError('mismatch') && f.confirmPassword.dirty && f.confirmPassword.touched">
+    Passwords do not match.
+    </p>
+  </div>
+
+  <!-- LOCATION INFO -->
+  <div class="grid grid-cols-2 gap-4" *ngIf="SelectedLocation">
+    <div>
+      <label class="label-text">City:</label>
+      <input type="text" [value]="SelectedLocation.city" readonly class="input input-bordered w-full" />
     </div>
+    <div>
+      <label class="label-text">Country:</label>
+      <input type="text" [value]="SelectedLocation.country" readonly class="input input-bordered w-full" />
+    </div>
+  </div>
+
+  <!-- MAP COMPONENT -->
+  <app-map (locationSelected)="onLocationSelected($event)" [reset]="mapResetTrigger"></app-map>
+  <p class="text-red-500 text-sm" *ngIf="submitted && !SelectedLocation">Please select your location on the map.</p>
+
+  <!-- SUBMIT -->
+  <div class="form-control mt-6">
+    <button 
+        type="submit" 
+        class="btn btn-outline btn-primary w-full" 
+         (click)="registerUser()">
+        Sign Up
+    </button>
+</div>
 </form>
