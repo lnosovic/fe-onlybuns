@@ -35,7 +35,7 @@ export class TrendsComponent implements OnInit{
   isPostModalOpen :boolean=false;
   showComments:boolean=false;
   usernames: {[userId:number]:string}={};
-  activeTab: string = 'top5Posts';
+  activeTab: string | null = null;
   constructor(private http: HttpClient,private router:Router, private postService: PostService){}
   ngOnInit(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -72,6 +72,7 @@ export class TrendsComponent implements OnInit{
       next:(posts)=>{
         this.posts = posts;
         this.posts.forEach(post=>this.fetchUsername(post.userId));
+        this.checkInitialLikeStatus();
       },
       error: (err) => console.error('Error fetching posts:', err)
     })
@@ -90,6 +91,7 @@ export class TrendsComponent implements OnInit{
         this.posts = posts;
         this.posts.forEach(post=>this.fetchUsername(post.userId));
         this.checkInitialLikeStatus();
+        console.log(posts);
       },
       error: (err) => console.error('Error fetching posts:', err)
     })

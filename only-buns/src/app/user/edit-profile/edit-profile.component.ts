@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms'
 import { Router } from '@angular/router';
 import { Location } from '../../post/models/location.model';
-import { Registration } from '../models/registration.model';
 import { User } from '../models/user.model';
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { MapComponent } from '../../layout/map/map.component';
@@ -35,8 +34,6 @@ export class EditProfileComponent implements OnInit{
   editForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     surname: new FormControl('', [Validators.required]),
-    username: new FormControl('', [Validators.required]),
-    email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required]),
     confirmPassword: new FormControl('', [Validators.required]),
   }, { validators: this.passwordMatchValidator() });
@@ -46,6 +43,7 @@ export class EditProfileComponent implements OnInit{
   }
   editUser():void{
     this.submitted = true;
+    if(this.editForm.valid){
        const updatedUser: any = {
         id: this.currentUser.id,
         name: this.editForm.value.name!,
@@ -54,7 +52,7 @@ export class EditProfileComponent implements OnInit{
         email: this.currentUser.email,
         password: this.editForm.value.password!,
         location: {
-          id: this.currentUser.location.id, // koristi postojeći ID
+          id: this.currentUser.location.id,
           latitude: this.SelectedLocation!.latitude,
           longitude: this.SelectedLocation!.longitude,
           city: this.SelectedLocation!.city,
@@ -72,12 +70,12 @@ export class EditProfileComponent implements OnInit{
           this.logout();
         },
         error: (err) => {
-           console.log("HMmmm")
          if (err.error) {
             alert('Unexpected error occurred during edit.');
           }
         }
       });
+    }
   }
 
   get f() { return this.editForm.controls; }
@@ -112,7 +110,6 @@ export class EditProfileComponent implements OnInit{
             this.editForm.patchValue({
               name: res.name,
               surname: res.surname,
-              username: res.username,
             });
 
             this.SelectedLocation = res.location;            

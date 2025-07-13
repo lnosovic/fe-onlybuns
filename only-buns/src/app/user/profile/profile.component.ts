@@ -389,7 +389,10 @@ export class ProfileComponent implements OnInit {
       });
     });
   }
-
+editProfile() {
+  console.log('Navigating to edit-profile');
+  this.router.navigate(['edit-profile']);
+}
 
 
 
