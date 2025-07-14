@@ -12,12 +12,17 @@ export class ChatWebSocketService {
     private messagesSubjects: Map<number, BehaviorSubject<ChatMessageResponseDTO[]>> = new Map();
     private subscriptions: Map<number, StompSubscription> = new Map();
 
-    private newChatSubject = new BehaviorSubject<{ id: number; name: string } | null>(null);
+    private newChatSubject = new BehaviorSubject<{ id: number; name: string;} | null>(null);
     public newChat$ = this.newChatSubject.asObservable();
+
+    private newRoomSubjects = new BehaviorSubject<number | null>(null);
+    public newRoom$ = this.newRoomSubjects.asObservable();
+
 
     private connectionPromise!: Promise<void>;
     private connectionResolver!: () => void;
     private isConnected = false;
+    
   
   
     constructor() {
@@ -40,6 +45,7 @@ export class ChatWebSocketService {
         connectHeaders: this.getConnectHeaders(),
         onConnect: () => {
           console.log('STOMP connected');
+          this.isConnected = true;
           this.connectionResolver();
           this.client.subscribe('/topic/new-chat', (message: IMessage) => {
             const body = JSON.parse(message.body) as { id: number; name: string | null };
@@ -70,6 +76,15 @@ export class ChatWebSocketService {
     return {};
   }
 
+  async subscribeToNewRooms(userId: number): Promise<void> {
+    await this.waitForConnection();
+    console.log('primljen user', userId, ' u ws sub to new rooms');
+    this.client.subscribe(`/topic/newChatRoom/${userId}`, (message: IMessage) => {
+      const roomId = JSON.parse(message.body);
+      console.log('📬 WS nova soba:', roomId);
+      this.newRoomSubjects.next(roomId);
+    });
+  }
   // Pretplata na chatroom topic po ID sobe, vraća Observable za poruke te sobe
   subscribeToRoom(roomId: number): Observable<ChatMessageResponseDTO[]> {
     // Ako već imamo BehaviorSubject za tu sobu, samo ga vraćamo

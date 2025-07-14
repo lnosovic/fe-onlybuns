@@ -5,6 +5,7 @@ export interface ChatRoom {
     groupChat: boolean; // Pazi, na backendu je 'isGroupChat', a ovde 'groupChat' ako Angular mapira tako
     admin?: User;
     participants: User[];
+    new? :boolean;
     // Dodaj ostala polja koja ti dolaze sa backenda
   }
   

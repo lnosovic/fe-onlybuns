@@ -18,7 +18,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M18 9v3m0 0v3m0-3h3m-3 0h-3M15 6a3 3 0 11-6 0 3 3 0 016 0zM6 18v-1a4 4 0 014-4h0a4 4 0 014 4v1" />
               </svg>
-              <p>Create group chat</p>
+              <p *ngIf="!adminId">Create group chat</p>
+              <p *ngIf="adminId && adminId===currentUser.id">Manage members</p>
             </a>
           </li>
         </ul>
@@ -51,7 +52,7 @@
     
         <!-- Footer: možeš staviti vreme ili ID za test -->
         <div class="chat-footer text-xs opacity-50 mt-1">
-          ID: {{ message.senderId }}
+          {{getSenderUsername(message.senderId)}}
         </div>
       </div>
     </div>
@@ -72,10 +73,10 @@
 
 
   <!-- ──◆ Manage‑Members Modal ◆──────────────────────────────────────── -->
-<input type="checkbox" id="member-modal" class="modal-toggle" [(ngModel)]="showMemberModal" />
+<input type="checkbox" id="member-modal" class="modal-toggle z-[9999]" [(ngModel)]="showMemberModal" *ngIf="showMemberModal"/>
 <div class="modal" *ngIf="showMemberModal">
   <label class="modal-backdrop" for="member-modal"></label>
-  <div class="modal-box w-11/12 max-w-3xl">
+  <div class="modal-box w-11/12 max-w-3xl" *ngIf="showMemberModal">
     <h3 *ngIf="isGroup" class="font-bold text-lg mb-4">Manage chat members</h3>
 
     <!-- Two‑column layout -->
@@ -112,7 +113,7 @@
             <a>
               <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" class="w-6 h-6 rounded-full" />
               <span class="flex-1">{{ member.username }}</span>
-              <span *ngIf="member.id !== currentUser.id"
+              <span *ngIf="member.id !== currentUser.id && currentUser.id===adminId || (!adminId && member.id !== currentUser.id)" 
                     class="badge badge-sm badge-error cursor-pointer"
                     (click)="removeUser(member)">
                 Remove
@@ -127,7 +128,7 @@
 
     <!-- modal actions -->
     <div class="modal-action flex justify-end gap-2">
-      <button class="btn" (click)="createGroupChat()">Create</button>
+      <button class="btn" *ngIf="!adminId" (click)="createGroupChat()">Create</button>
       <button class="btn" (click)="closeMemberManager()">Close</button>
     </div>
 

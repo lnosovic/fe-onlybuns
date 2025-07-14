@@ -7,7 +7,7 @@ import { ChatService } from '../chat.service';
 import { ChatMessageDTO, ChatMessageResponseDTO } from '../chat.model';
 import { User } from '../../user/models/user.model';
 import { AuthService } from '../../user/auth.service';
-import { firstValueFrom, forkJoin, Subscription } from 'rxjs';
+import { firstValueFrom, forkJoin, Observable, Subscription } from 'rxjs';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { ChatWebSocketService } from '../chat.websocket.service';
 import { UserService } from '../../user/user.service';
@@ -29,6 +29,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   @Input() chatRoomName!: string;
   @Output() closeWindow = new EventEmitter<number>();
 
+
+
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
 
   currentUser!: User; // definisan, ali će se učitati async
@@ -44,6 +46,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   searchResults: User[] = [];
   currentMembers: User[] = [];
 
+  adminId!: number;
+
   constructor(
     private chatWebSocketService: ChatWebSocketService,
     private chatService: ChatService,
@@ -57,6 +61,25 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     // 1. Učitaj trenutnog korisnika
     console.log('current room id', this.chatRoomId);
     console.log('init cwc');
+    
+    try{
+      this.chatService.getAdminId(this.chatRoomId).subscribe({
+        next: (id) => {
+          this.adminId = id;
+          console.log('Admin ID:', this.adminId);
+        },
+        error: (err) => {
+          this.adminId = 0;
+          //console.error('❌ Greška pri dohvatanju admin ID-ja:', err);
+        }
+      });
+    }
+    catch{
+      this.adminId = 0;
+    }
+
+
+
     await this.chatWebSocketService.waitForConnection();
 
 
@@ -188,6 +211,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       next: () => {
         // Poruka je sačuvana, ali ne dodajemo odmah u this.messages
         // Očekujemo da će live update doći preko WebSocketa
+        this.chatService.setRoomNewStatus(messageDTO.roomId);
         this.messageContent = '';
         this.isSending = false;
         this.scrollToBottom();
@@ -215,6 +239,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   openMemberManager() {
     //this.currentMembers = [...this.chatRoom.participants];
     this.showMemberModal = true;
+    // setTimeout(() => {
+    //   this.showMemberModal = true;
+    // });
   }
   
   closeMemberManager() {
@@ -241,7 +268,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   addUser(user: User) {
     this.currentMembers.push(user);
    }
-  removeUser(user: User) { /* pozovi servis, updateuj currentMembers */ }
+  removeUser(user: User) {
+    this.currentMembers = this.currentMembers.filter(u=> u.id !== user.id);
+  }
 
 
 
@@ -271,7 +300,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
                 name: newGroup.name || 'New Chat Group'
               }
               this.chatUi.openWindow(windowToOpen);
-              sub.unsubscribe(); // da ne curi memorija
+              //sub.unsubscribe(); // da ne curi memorija
             });
           },
           error: (err) => {
@@ -285,9 +314,16 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     });
   }
 
+  getSenderUsername(senderId: number){
+    if(senderId && senderId!=0){
+      return this.currentMembers.find(m => m.id===senderId)?.username;
+    }
+    return 'Unknown';
+  }
 
-
-
+  get modalId() {
+    return `member-modal-${this.chatRoomId}`;
+  }
 
 
 
@@ -302,8 +338,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     console.log('des');
-    this.messagesSub?.unsubscribe();
-    this.chatWebSocketService.unsubscribeFromRoom(this.chatRoomId);
+    //this.messagesSub?.unsubscribe();
+    //this.chatWebSocketService.unsubscribeFromRoom(this.chatRoomId);
   }
 
 

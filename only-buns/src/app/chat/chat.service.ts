@@ -5,6 +5,7 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 import { ChatMessageDTO, ChatMessageResponseDTO, ChatRoom, CreatePersonalChatRequest } from './chat.model';
 import { User } from '../user/models/user.model';
+import { ChatWebSocketService } from './chat.websocket.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,10 @@ export class ChatService {
   private apiUrl = 'http://localhost:8080/api/chat'; // Bazni URL tvog backend chat kontrolera
   public myChatRooms$ = new BehaviorSubject<ChatRoom[]>([]);
   refreshCompleted = new Subject<void>();
+
+  private newRoomSubject = new Subject<number>();
+  newRoom$ = this.newRoomSubject.asObservable();
+
 
   currentUser:User={
     id:0,
@@ -27,11 +32,16 @@ export class ChatService {
     followingCount: 0    
   }
 
-  constructor(private http: HttpClient) { }
-
-  async ngOnInit() {
-    await this.loadCurrentUser();
+  constructor(private http: HttpClient, private chatWebSocketService: ChatWebSocketService) {
+    this.loadCurrentUser().then(() => {
+      console.log('cs init');
+    });
   }
+
+  // async ngOnInit() {
+  //   await this.loadCurrentUser();
+  //   console.log('cs init');
+  // }
 
   // Pomoćna funkcija za dobijanje HTTP hedera sa JWT tokenom.
   // OVO JE KRITIČNO I MORAŠ JE IMPLEMENTIRATI PRAVILNO U STVARNOJ APLIKACIJI!
@@ -103,7 +113,8 @@ export class ChatService {
   //       this.myChatRooms$.next(roomsWithParticipants)
   //     );
   // }
-  refreshMyChatRooms(): void {
+  async refreshMyChatRooms(): Promise<void> {
+    await this.loadCurrentUser();
     this.http
       .get<ChatRoom[]>(`${this.apiUrl}/rooms/my-chatrooms`, {
         headers: this.getAuthHeaders(),
@@ -123,6 +134,8 @@ export class ChatService {
                 // ⬇️ Setuj ime ovde ako nije već definisano
                 fullRoom.name = this.setChatName(fullRoom);
   
+                this.chatWebSocketService.subscribeToRoom(room.id);
+
                 return fullRoom;
               }),
               catchError(() =>
@@ -191,7 +204,7 @@ export class ChatService {
         switchMap(newRoom =>
           this.getParticipants(newRoom.id).pipe(
             map(participants => {
-              const roomWithParticipants: ChatRoom = { ...newRoom, participants };
+              const roomWithParticipants: ChatRoom = { ...newRoom, participants, new: true };
               const resolvedName = this.setChatName(roomWithParticipants);
               return { ...roomWithParticipants, name: resolvedName };
             }),
@@ -299,7 +312,10 @@ export class ChatService {
     if (room.name){
       return room.name;
     }
-    return room.participants.find(p => p.id !== this.currentUser?.id)?.username ?? 'Nepoznat';
+    else if(this.currentUser.id != 0){
+      return room.participants.find(p => p.id !== this.currentUser?.id)?.username ?? 'Nepoznat';
+    } 
+    return 'Unknown';
   }
 
 
@@ -319,7 +335,33 @@ export class ChatService {
     );
   }
 
+  setRoomNewStatus(roomId: number): void {
+    const currentRooms = this.myChatRooms$.value;
+  
+    const updatedRooms = currentRooms.map(room =>
+      room.id === roomId ? { ...room, new: true } : room
+    );
+  
+    this.myChatRooms$.next(updatedRooms);
+  }
 
+  async subscribeToNewRooms():Promise<void> {
+    await this.loadCurrentUser();
+    console.log('sub user', this.currentUser.id, 'to new rooms');
+    this.chatWebSocketService.waitForConnection();
+    this.chatWebSocketService.subscribeToNewRooms(this.currentUser.id);
+    this.chatWebSocketService.newRoom$.subscribe(roomId => {
+      if (roomId) {
+        console.log('🔁 Nova soba stigla, refrešujem...');
+        this.refreshMyChatRooms();
+      }
+    });
+  }
+
+
+  getAdminId(chatRoomId: number): Observable<number> {
+    return this.http.get<number>(`http://localhost:8080/api/chat/${chatRoomId}/adminId`) || 0;
+  }
 
   /**
    * Pomoćna funkcija za centralizovano rukovanje HTTP greškama.
@@ -342,6 +384,8 @@ export class ChatService {
     // Vraćamo Observable koji baca grešku kako bi komponenta mogla da je obradi.
     return throwError(() => new Error(errorMessage));
   }
+
+
 
   
 }

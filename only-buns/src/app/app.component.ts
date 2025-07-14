@@ -8,6 +8,9 @@ import { ChatWidgetComponent } from './chat/chat-widget/chat-widget.component';
 import { ChatWindowComponent } from './chat/chat-window/chat-window.component';
 import { AuthService } from './user/auth.service';
 import { ChatUiService } from './chat/chat.ui.service';
+import { ChatService } from './chat/chat.service';
+import { ChatWebSocketService } from './chat/chat.websocket.service';
+import { filter, skip } from 'rxjs';
 
 // Interfejs za otvoren prozor chata - SA pozicionim podacima
 interface OpenChatWindow {
@@ -34,17 +37,59 @@ export class AppComponent implements OnInit{
   title = 'only-buns';
 
   openChatWindows: OpenChatWindow[] = [];
-
+  firstInit = true;
   // Pomoćne promenljive za izračunavanje pozicije (koriste se u TS logici)
   windowWidth = 320; // DaisyUI card w-80 je 320px
   windowSpacing = 16; // Razmak između prozora (npr. tailwind p-4 je 16px)
   chatWidgetWidth = 320; // Širina glavnog chat widgeta (da bi se chat prozori pozicionirali pored njega)
   initialRightOffset = 16; // bottom-4 right-4 na glavnom widgetu, da bi se prvi prozor postavio desno od njega
 
-  constructor(private authService: AuthService, private chatUi: ChatUiService) { }
+  constructor(private authService: AuthService, private chatUi: ChatUiService,     private chatWebSocketService: ChatWebSocketService,
+    private chatService: ChatService) { }
 
   ngOnInit() {
     this.chatUi.openWindows$.subscribe(ws => (this.openChatWindows = ws));
+    // this.wsService.messageSubjects$.subscribe((message) => {
+    //   console.log('💬 Nova poruka:', message);
+    //   this.chatService.refreshMyChatRooms();
+    // });
+    this.chatService.refreshMyChatRooms();
+    this.chatService.subscribeToNewRooms();
+    
+    this.chatService.newRoom$.subscribe(roomId => {
+      if (roomId) {
+        this.chatService.refreshMyChatRooms();
+      }
+    });
+    //ne pitaj
+    this.chatService.refreshMyChatRooms();
+    this.chatService.refreshCompleted.subscribe(() => {
+      // sve sobe su učitane i pretplate su postavljene
+      // možemo slušati poruke iz svih soba
+      for (const room of this.chatService.myChatRooms$.value) {
+        this.chatWebSocketService
+          .subscribeToRoom(room.id)
+          .pipe(skip(1))          //da se prvi put ne otvore sve xd
+          .subscribe((messages) => {
+            const latest = messages[messages.length - 1];
+            if (!this.chatUi.isChatWindowOpen(room.id)) {
+              const updatedRooms = this.chatService.myChatRooms$.value.map(r =>
+                r.id === room.id ? { ...r } : r
+              );
+              this.chatService.myChatRooms$.next(updatedRooms);
+
+              const roomToOpen = {
+                id: room.id,
+                name: room.name || '?'
+              };
+
+                console.log('otvara');
+                this.chatUi.openWindow(roomToOpen);
+            }
+          });
+
+      }
+    });
   }
 
   /**
@@ -81,6 +126,8 @@ export class AppComponent implements OnInit{
     };
     this.chatUi.openWindow(chatRoom)
   }
+
+  
 
   isAuthenticated(){
     return this.authService.isAuthenticated();

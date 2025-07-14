@@ -19,6 +19,8 @@ export class ChatUiService {
   /** Observable koji čitaju AppComponent i drugi */
   openWindows$ = this.windows$.asObservable();
 
+
+
   openWindow(room: { id: number; name: string }) {
     const exists = this.windows$.value.some(w => w.id === room.id);
     if (!exists) {
@@ -29,7 +31,16 @@ export class ChatUiService {
       ]);
     }
   }
-
+  isChatWindowOpen(roomId: number){
+    const exists = this.windows$.value.some(w => w.id === roomId);
+    if(!exists){
+      return false;
+    }
+    else{
+      return true;
+    }
+  }
+  
   closeWindow(roomId: number) {
     this.windows$.next(this.windows$.value.filter(w => w.id !== roomId));
     this.repositionChatWindows();

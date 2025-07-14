@@ -8,6 +8,7 @@ import { User } from '../../user/models/user.model';
 import { ChatService } from '../chat.service';
 import { ChatUiService } from '../chat.ui.service';
 import { ChatRoom } from '../chat.model';
+import { ChatWebSocketService } from '../chat.websocket.service';
 
 
 @Component({
@@ -48,7 +49,7 @@ export class ChatWidgetComponent implements OnInit {
     followingCount: 0
   }
 
-  constructor(private http:HttpClient, private chatService: ChatService, private chatUi: ChatUiService) { }
+  constructor(private http:HttpClient, private chatService: ChatService, private chatUi: ChatUiService,  private chatWebSocket: ChatWebSocketService) { }
 
   ngOnInit(): void {
     //this.chatUi.openWindows$.subscribe(ws => (this.openChatWindows = ws));
@@ -59,15 +60,26 @@ export class ChatWidgetComponent implements OnInit {
     //   console.log(this.chatService.getMyChatRooms().forEach(e => console.log(e)));
        //this.loadRecentChats();
     // });
+    // this.loadCurrentUser().then(()=>{
+    //   this.sub = this.chatService.getMyChatRoomsObservable()
+    //   .subscribe(rooms => {
+    //     this.recentChats = rooms;
+    //     console.log('Recent chats updated:', rooms);
+    //   });
+  
+    //   // Po inicijalnom loadu, osveži sobe
+    //   this.chatService.refreshMyChatRooms();
+    // })
+      this.sub = this.chatService.getMyChatRoomsObservable()
+      .subscribe(rooms => {
+        this.recentChats = rooms;
+        console.log('Recent chats updated:', rooms);
+      });
+  
+      // Po inicijalnom loadu, osveži sobe
+      this.chatService.refreshMyChatRooms();
 
-    this.sub = this.chatService.getMyChatRoomsObservable()
-    .subscribe(rooms => {
-      this.recentChats = rooms;
-      console.log('Recent chats updated:', rooms);
-    });
 
-    // Po inicijalnom loadu, osveži sobe
-    this.chatService.refreshMyChatRooms();
     
    }
 
