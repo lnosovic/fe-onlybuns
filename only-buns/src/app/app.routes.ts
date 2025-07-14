@@ -12,6 +12,8 @@ import { AdminDashboardComponent } from './admin/admin-dashboard/admin-dashboard
 import { AdminGuard } from './user/auth/admin.guard';
 import { PostDetailsComponent } from './post/post-details/post-details.component';
 import { EditProfileComponent } from './user/edit-profile/edit-profile.component';
+import { AdminUsersComponent } from './admin/admin-users/admin-users.component';
+import { AnalyticsComponent } from './admin/analytics/analytics.component';
 
 export const routes: Routes = [
     { path: 'posts', component: PostsPreviewComponent },
@@ -23,7 +25,9 @@ export const routes: Routes = [
     { path: 'trends',component:TrendsComponent},
     { path: 'map',component:MapComponent},
     { path: 'posts-map', component:PostsMapComponent},
-    { path: 'admin', component: AdminDashboardComponent, canActivate: [AdminGuard] }, // <-- DODAJ canActivate: [AdminGuard]
+    { path: 'admin', component: AdminDashboardComponent, canActivate: [AdminGuard] }, 
+    { path: 'admin/users', component: AdminUsersComponent, canActivate: [AdminGuard]},
+    { path: 'admin/analytics', component: AnalyticsComponent},// <-- DODAJ canActivate: [AdminGuard]
     { path: 'post/:id', component: PostDetailsComponent },
     { path: 'edit-profile', component: EditProfileComponent},
 
