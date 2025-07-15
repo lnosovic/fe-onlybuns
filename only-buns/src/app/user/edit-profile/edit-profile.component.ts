@@ -7,10 +7,11 @@ import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { MapComponent } from '../../layout/map/map.component';
 import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-edit-profile',
   standalone: true,
-  imports: [ReactiveFormsModule,CommonModule,MapComponent],
+  imports: [ReactiveFormsModule,CommonModule,MapComponent,FormsModule],
   templateUrl: './edit-profile.component.html',
   styleUrl: './edit-profile.component.css'
 })
@@ -27,15 +28,16 @@ export class EditProfileComponent implements OnInit{
     followerCount: 0,
     followingCount: 0    
   }
- submitted = false;
+  submitted = false;
   confirmPassword: any|null=null;
   SelectedLocation: Location | null = null;
   mapResetTrigger: boolean = false; 
+  changePassword: boolean = false;
   editForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     surname: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required]),
-    confirmPassword: new FormControl('', [Validators.required]),
+    password: new FormControl(''), // No validators initially
+    confirmPassword: new FormControl(''), // No validators initially
   }, { validators: this.passwordMatchValidator() });
   constructor(private router:Router,private http:HttpClient){}
   ngOnInit(): void {
@@ -50,7 +52,6 @@ export class EditProfileComponent implements OnInit{
         surname: this.editForm.value.surname!,
         username: this.currentUser.username,
         email: this.currentUser.email,
-        password: this.editForm.value.password!,
         location: {
           id: this.currentUser.location.id,
           latitude: this.SelectedLocation!.latitude,
@@ -58,7 +59,11 @@ export class EditProfileComponent implements OnInit{
           city: this.SelectedLocation!.city,
           country: this.SelectedLocation!.country
         }
+        
       };
+      if (this.changePassword) {
+        updatedUser.password = this.editForm.value.password!;
+      }
       const token = localStorage.getItem("jwt");
       const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`,
@@ -81,6 +86,9 @@ export class EditProfileComponent implements OnInit{
   get f() { return this.editForm.controls; }
   passwordMatchValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
+    if (!this.changePassword) {
+        return null; // Don't validate if we are not changing the password
+    }
     const password = control.get('password')?.value;
     const confirmPassword = control.get('confirmPassword')?.value;
     if (password !== confirmPassword) {
@@ -121,5 +129,31 @@ export class EditProfileComponent implements OnInit{
    logout(){
     localStorage.removeItem('jwt');
     this.router.navigate(['login']);
+  }
+  togglePasswordChange(): void {
+    // FIX 3: Removed 'this.changePassword = !this.changePassword;'
+    // The [(ngModel)] handles updating the value automatically.
+    // This function now only handles the logic for validators.
+
+    const passwordControl = this.editForm.get('password');
+    const confirmPasswordControl = this.editForm.get('confirmPassword');
+
+    if (this.changePassword) {
+      // If toggle is ON, add validators
+      passwordControl?.setValidators([Validators.required]);
+      confirmPasswordControl?.setValidators([Validators.required]);
+    } else {
+      // If toggle is OFF, clear validators and reset values
+      passwordControl?.clearValidators();
+      confirmPasswordControl?.clearValidators();
+      passwordControl?.setValue('');
+      confirmPasswordControl?.setValue('');
+    }
+
+    // Update the validity state for both controls
+    passwordControl?.updateValueAndValidity();
+    confirmPasswordControl?.updateValueAndValidity();
+    // Also re-evaluate the whole form to check the mismatch validator
+    this.editForm.updateValueAndValidity();
   }
 }

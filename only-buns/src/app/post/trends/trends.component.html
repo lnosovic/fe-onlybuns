@@ -18,17 +18,41 @@
   </div>
 </div>
   <!-- Tabs -->
-  <div role="tablist" class="tabs tabs-boxed mb-4 justify-center shrink-0 sticky top-0 bg-base-100 z-10">
-    <a role="tab" class="tab" [ngClass]="{'tab-active': activeTab === 'top5Posts'}" (click)="setActiveTab('top5Posts')">
-      Top 5 Posts (Last 7 Days)
-    </a>
-    <a role="tab" class="tab" [ngClass]="{'tab-active': activeTab === 'top10Posts'}" (click)="setActiveTab('top10Posts')">
-      Top 10 Posts Ever
-    </a>
-    <a role="tab" class="tab" [ngClass]="{'tab-active': activeTab === 'top10Users'}" (click)="setActiveTab('top10Users')">
-      Top 10 Users (Last 7 Days)
-    </a>
-  </div>
+  <div role="tablist" class="tabs tabs-boxed mb-4 justify-center shrink-0 sticky top-0 bg-base-100 z-10 shadow-md rounded-lg px-2">
+  <a
+    role="tab"
+    class="tab font-semibold px-6 py-2 transition-all duration-300 rounded-lg"
+    [ngClass]="{
+      'tab-active bg-primary text-white shadow-lg': activeTab === 'top5Posts',
+      'hover:bg-primary hover:text-white': activeTab !== 'top5Posts'
+    }"
+    (click)="setActiveTab('top5Posts')"
+  >
+    🕓 Top 5 Posts (7 Days)
+  </a>
+  <a
+    role="tab"
+    class="tab font-semibold px-6 py-2 transition-all duration-300 rounded-lg"
+    [ngClass]="{
+      'tab-active bg-primary text-white shadow-lg': activeTab === 'top10Posts',
+      'hover:bg-primary hover:text-white': activeTab !== 'top10Posts'
+    }"
+    (click)="setActiveTab('top10Posts')"
+  >
+    🏆 Top 10 Posts Ever
+  </a>
+  <a
+    role="tab"
+    class="tab font-semibold px-6 py-2 transition-all duration-300 rounded-lg"
+    [ngClass]="{
+      'tab-active bg-primary text-white shadow-lg': activeTab === 'top10Users',
+      'hover:bg-primary hover:text-white': activeTab !== 'top10Users'
+    }"
+    (click)="setActiveTab('top10Users')"
+  >
+    👑 Top 10 Users (7 Days)
+  </a>
+</div>
 
   <!-- Scrollable Content -->
   <div class="overflow-y-auto grow px-1">

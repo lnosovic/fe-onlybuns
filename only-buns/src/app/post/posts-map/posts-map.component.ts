@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { User } from '../../user/models/user.model';
 import { Location } from '../models/location.model';
 import { Post } from '../models/post.model';
+import { RabbitCare } from '../models/rabbit-care.model';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 @Component({
@@ -17,6 +18,7 @@ import { map } from 'rxjs/operators';
 export class PostsMapComponent implements AfterViewInit {
 private map: any;
 posts:Post[]=[];
+rabbitCares:RabbitCare[]=[];
 currentUser:User={
     id:0,
     name: '',
@@ -63,6 +65,7 @@ currentUser:User={
             this.currentUser = res;
             this.loadPosts();
             this.initMap();
+            this.loadRabbitCareLocations();
           },
           error: (err) => console.error('Error fetching user:', err)
         });
@@ -154,5 +157,49 @@ currentUser:User={
     this.router.navigate(['profile',userId])
     //console.log('plaki')
     
+  }
+  loadRabbitCareLocations() {
+    const token = localStorage.getItem("jwt") || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
+    });
+
+    this.http.get<RabbitCare[]>('http://localhost:8080/api/rabbitCare', { headers }).subscribe({
+      next: (rabbitCares) => {
+        this.rabbitCares = rabbitCares;
+        this.rabbitCares.forEach(care => {
+          console.log(care);
+          this.addRabbitCareMarker(care);
+        });
+      },
+      error: (err) => console.error('Error fetching rabbit care locations:', err),
+    });
+  }
+  private addRabbitCareMarker(care: RabbitCare): void {
+    const icon = L.divIcon({
+      className: '',
+      html: `
+        <div class="flex flex-col items-center">
+          <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center r text-white text-2xl font-bold">
+            🏥
+          </div>
+          <span class="text-xs font-semibold text-black mt-1">${care.name}</span>
+        </div>
+      `
+    });
+
+    const marker = L.marker([care.latitude, care.longitude], { icon }).addTo(this.map);
+
+    const popupContent = `
+      <div class="bg-white rounded-xl shadow-md overflow-hidden w-60 text-black p-3">
+        <h2 class="text-lg font-bold text-green-700 mb-1">${care.name}</h2>
+        <p class="text-sm text-gray-500">
+          📍 ${care.city}, ${care.country}
+        </p>
+      </div>
+    `;
+
+    marker.bindPopup(popupContent);
   }
 }
