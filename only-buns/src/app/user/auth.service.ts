@@ -62,7 +62,7 @@ export class AuthService {
     if (userInfo && userInfo.role) { // Pretpostavljam da JWT token ima 'role' polje
       // Spring Security često vrati ulogu u formatu 'ROLE_ADMIN', 'ROLE_USER' itd.
       // Tvoja uloga admina bi trebalo da bude ROLE_ADMIN
-      console.log("auth.service.ts/isAdmin: user role:", userInfo.role);
+      //console.log("auth.service.ts/isAdmin: user role:", userInfo.role);
       return userInfo.role === 'ROLE_ADMIN'; // Ili whatever your admin role is in the token
     }
     return false;

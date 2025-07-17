@@ -8,11 +8,13 @@ import { PostService } from '../../post/post.service';
 import { ChatService } from '../../chat/chat.service';
 import { firstValueFrom } from 'rxjs';
 import { ChatUiService } from '../../chat/chat.ui.service';
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -41,9 +43,75 @@ export class ProfileComponent implements OnInit {
   selectedPost:any=null;
   showComments=false;
   isHoveringUnfollow = false;
+
+
+
+  editingPostId: number | null = null;
+  editedDescription: string = '';
+
+  activePostMenu: any = null;
+
+  startEditing(post: Post): void {
+    this.editingPostId = post.id;
+    this.editedDescription = post.description;
+  
+    // mali delay da textarea postoji u DOM-u pa se tek onda fokusira
+    setTimeout(() => {
+      const input = document.querySelector('textarea') as HTMLTextAreaElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    });
+  }
+  
+  submitEdit(post: Post): void {
+    const trimmed = this.editedDescription.trim();
+    if (trimmed && trimmed !== post.description) {
+      this.postService.updateDescription(post.id, trimmed).subscribe({
+        next: (updated) => {
+          post.description = updated.description;
+          this.editingPostId = null;
+        },
+        error: () => {
+          console.error('Failed to update');
+          this.editingPostId = null;
+        }
+      });
+    } else {
+      this.editingPostId = null;
+    }
+  }
+  togglePostMenu(post: any) {
+    this.activePostMenu = this.activePostMenu === post ? null : post;
+  }
+
+  postToDelete: Post | null = null;
+  deletePost(post: Post): void {
+    this.postToDelete = post; // samo otvara modal
+  }
+  
+  confirmDelete(): void {
+    if (!this.postToDelete) return;
+  
+    this.postService.deletePost(this.postToDelete.id).subscribe({
+      next: () => {
+        this.posts = this.posts.filter(p => p.id !== this.postToDelete!.id);
+        this.postToDelete = null;
+      },
+      error: (err) => {
+        console.error('Failed to delete post', err);
+        this.postToDelete = null;
+      }
+    });
+  }
+  
+  cancelDelete(): void {
+    this.postToDelete = null;
+  }
   
   constructor(private http:HttpClient,private activeRouter:ActivatedRoute,private router:Router, private postService: PostService, private chatService: ChatService,
-    private chatUi: ChatUiService
+    private chatUi: ChatUiService, private authService: AuthService
   ){}
   ngOnInit(): void {
     this.activeRouter.params.subscribe(async params => {
@@ -69,7 +137,9 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-
+  isAdmin(){
+    return this.authService.isAdmin();
+  }
   loadUserInfo(userId:number){
     this.http.get<User>(`http://localhost:8080/api/users/profile/${userId}`).subscribe({
       next:(user)=>{
@@ -249,6 +319,9 @@ export class ProfileComponent implements OnInit {
         if (this.userProfile) {
           this.userProfile.followerCount = this.userProfile.followerCount + 1;
           console.log('Odgovor sa servera:', response);
+          if (this.currentUser && this.userProfile) {
+            this.followers.push(this.currentUser); // ili ceo user ako imaš
+          }
         }
       },
       error: (err) => {
@@ -256,9 +329,7 @@ export class ProfileComponent implements OnInit {
         //alert('Došlo je do greške prilikom praćenja.');
       }
     });
-    if (this.currentUser && this.userProfile) {
-      this.followers.push(this.currentUser); // ili ceo user ako imaš
-    }
+
   }
 
   unfollowUser(): void {

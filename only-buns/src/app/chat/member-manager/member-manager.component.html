@@ -1,0 +1,76 @@
+<!-- member-manager.component.html -->
+<div class="bg-base-100 w-full max-w-3xl rounded-lg shadow-lg p-6">
+    <h3 class="font-bold text-lg mb-4 text-center">Manage chat members</h3>
+  
+    <div class="mb-4" *ngIf="!adminId && !isGroup">
+        <label class="input input-bordered flex items-center gap-2">
+          <input type="text"
+                 class="grow"
+                 placeholder="Group chat name"
+                 [(ngModel)]="groupChatName" />
+        </label>
+      </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Search users -->
+      <div  *ngIf="!adminId || adminId === currentUserId">
+        <label class="input input-bordered flex items-center gap-2 mb-3">
+          <input type="text"
+                 class="grow"
+                 placeholder="Search users…"
+                 [(ngModel)]="userSearch"
+                 (input)="searchUsers()" />
+        </label>
+  
+        <ul class="menu bg-base-100 rounded-box max-h-56 overflow-y-auto">
+          <li *ngFor="let user of searchResults">
+            <a (click)="addUser(user)">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" class="w-6 h-6 rounded-full" />
+              <span class="flex-1">{{ user.username }}</span>
+              <span class="badge badge-sm badge-primary">Add</span>
+            </a>
+          </li>
+          <li *ngIf="searchResults.length === 0" class="disabled opacity-50 justify-center">No users</li>
+        </ul>
+      </div>
+  
+      <!-- Current members -->
+      <div>
+        <h4 class="font-semibold mb-2">Current members</h4>
+        <ul class="menu bg-base-100 rounded-box max-h-64 overflow-y-auto">
+            <li *ngFor="let member of currentMembers" 
+            [ngClass]="{ 'opacity-50': isMarkedForRemoval(member) }">
+                <a class="flex justify-between items-center">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" class="w-6 h-6 rounded-full" />
+
+                    <span>{{ member.username }}</span>
+                
+                    <ng-container *ngIf="(member.id !== currentUserId && currentUserId === adminId) || (!adminId && currentUserId !== member.id)">
+                        <span *ngIf="!isMarkedForRemoval(member)"
+                                class="badge badge-sm badge-error cursor-pointer"
+                                (click)="removeUser(member)">
+                            Remove
+                        </span>
+                    
+                        <span *ngIf="isMarkedForRemoval(member)"
+                                class="badge badge-sm badge-outline cursor-pointer"
+                                (click)="undoRemoveUser(member)">
+                            Undo
+                        </span>
+                    </ng-container>
+                
+                    <span *ngIf="member.id === currentUserId" class="badge badge-sm badge-ghost">You</span>
+                </a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  
+    <!-- Buttons -->
+    <div class="modal-action flex justify-end gap-2 mt-4">
+      <button class="btn" *ngIf="!adminId && !isGroup" (click)="createGroupChat()">Create</button>
+      <button class="btn" *ngIf="adminId==currentUserId" (click)="updateGroupChat()">Save</button>
+      <button class="btn" (click)="closeModal()">Close</button>
+    </div>
+  </div>
+  

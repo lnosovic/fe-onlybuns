@@ -7,11 +7,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PostService } from '../post.service'; // PostService je sada ispravno uvezen
 import { Observable, of } from 'rxjs'; // Dodaj 'of'
 import { tap, catchError, switchMap } from 'rxjs/operators'; // Dodaj 'tap', 'catchError', 'switchMap'
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../user/auth.service';
 
 @Component({
   selector: 'app-posts-preview',
   standalone: true,
-  imports:[CommonModule],
+  imports:[CommonModule, FormsModule],
   templateUrl: './posts-preview.component.html',
   styleUrl: './posts-preview.component.css'
 })
@@ -32,30 +34,135 @@ import { tap, catchError, switchMap } from 'rxjs/operators'; // Dodaj 'tap', 'ca
       followerCount: 0,
       followingCount: 0
   }
+  following:User[] = [];
+
+  editingPostId: number | null = null;
+  editedDescription: string = '';
+
+  activePostMenu: any = null;
+
+  imageCache = new Map<string, HTMLImageElement>();
+
+  preloadImage(url: string) {
+    if (!this.imageCache.has(url)) {
+      const img = new Image();
+      img.src = url;
+      this.imageCache.set(url, img);
+    }
+  }
+  startEditing(post: Post): void {
+    this.editingPostId = post.id;
+    this.editedDescription = post.description;
+  
+    // mali delay da textarea postoji u DOM-u pa se tek onda fokusira
+    setTimeout(() => {
+      const input = document.querySelector('textarea') as HTMLTextAreaElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    });
+  }
+  
+  submitEdit(post: Post): void {
+    const trimmed = this.editedDescription.trim();
+    if (trimmed && trimmed !== post.description) {
+      this.postService.updateDescription(post.id, trimmed).subscribe({
+        next: (updated) => {
+          post.description = updated.description;
+          this.editingPostId = null;
+        },
+        error: () => {
+          console.error('Failed to update');
+          this.editingPostId = null;
+        }
+      });
+    } else {
+      this.editingPostId = null;
+    }
+  }
+  togglePostMenu(post: any) {
+    this.activePostMenu = this.activePostMenu === post ? null : post;
+  }
+
+  editPost(post: Post): void {
+    // const newDescription = prompt('Enter new description:', post.description);
+    // if (newDescription !== null) {
+    //   this.postService.updateDescription(post.id, newDescription).subscribe({
+    //     next: (updatedPost) => {
+    //       post.description = updatedPost.description; // update local state
+    //     },
+    //     error: (err) => {
+    //       console.error('Failed to update description', err);
+    //     }
+    //   });
+    // }
+  }
+
+  postToDelete: Post | null = null;
+  deletePost(post: Post): void {
+    this.postToDelete = post; // samo otvara modal
+  }
+  
+  confirmDelete(): void {
+    if (!this.postToDelete) return;
+  
+    this.postService.deletePost(this.postToDelete.id).subscribe({
+      next: () => {
+        this.posts = this.posts.filter(p => p.id !== this.postToDelete!.id);
+        this.postToDelete = null;
+      },
+      error: (err) => {
+        console.error('Failed to delete post', err);
+        this.postToDelete = null;
+      }
+    });
+  }
+  
+  cancelDelete(): void {
+    this.postToDelete = null;
+  }
 
   // Konstruktor injektuje potrebne servise
-  constructor(private route: ActivatedRoute, private http:HttpClient, private router: Router, private postService: PostService){
+  constructor(private route: ActivatedRoute, private http:HttpClient, private router: Router, private postService: PostService, private authService: AuthService){
   }
 
   ngOnInit(): void {
+    this.preloadImage('https://www.protexinvet.com/userfiles/image/cute-2500929_1920_1_light.jpg');
+
     // Lančano učitavanje: prvo postovi, pa korisnik, pa provera lajkova
     this.loadPosts().pipe(
       // Kada se loadPosts() završi i emituje postove, switchMap prebacuje na novi Observable
       // u ovom slučaju, Observable koji vraća loadCurrentUser()
-      switchMap(() => this.loadCurrentUser())
+      switchMap(() => this.loadCurrentUser()),
+      switchMap((user) => {
+        if (user && user.id && !this.isAdmin()) {
+          // Vrati Observable od HTTP zahteva za following korisnike
+          return this.loadUserFollowing(user.id);
+        }
+        // Ako nema usera, samo nastavi dalje sa praznim Observable
+        return of([]);
+      })
     ).subscribe({
       next: () => {
         // Ovaj 'next' blok se poziva tek kada se OBA Observables (posts i currentUser) završe
         // I postovi i currentUser su sada dostupni i postavljeni na 'this.'
+
+        this.sortPostsByFollowing();
         this.checkInitialLikeStatus();
       },
       error: (err) => {
         // Uhvati bilo koju grešku iz lanca (loadPosts ili loadCurrentUser)
         console.error('Greška tokom inicijalnog učitavanja postova ili korisnika:', err);
         // I dalje probaj da proveriš lajkove, čak i ako nešto nije uspelo (biće false)
+        this.sortPostsByFollowing();
         this.checkInitialLikeStatus();
       }
     });
+  }
+
+  isAdmin(){
+    return this.authService.isAdmin();
   }
 
   // Modifikovana metoda loadCurrentUser() da vraća Observable
@@ -194,6 +301,8 @@ import { tap, catchError, switchMap } from 'rxjs/operators'; // Dodaj 'tap', 'ca
     }
   }
 
+  
+
   viewPostDetails(postId: number): void {
     // Koristimo router.navigate da odemo na putanju '/post/:id'
     this.router.navigate(['/post', postId]);
@@ -211,6 +320,30 @@ import { tap, catchError, switchMap } from 'rxjs/operators'; // Dodaj 'tap', 'ca
     }
   }
 
+  sortPostsByFollowing() {
+    if (!this.following || this.following.length === 0) return;
+  
+    const followingIds = new Set(this.following.map(u => u.id));
+  
+    this.posts.sort((a, b) => {
+      const aIsFollowing = followingIds.has(a.userId);
+      const bIsFollowing = followingIds.has(b.userId);
+  
+      if (aIsFollowing && !bIsFollowing) return -1; // a ide pre b
+      if (!aIsFollowing && bIsFollowing) return 1;  // b ide pre a
+      return 0; // ako su oba ili nisu, ostavi redosled
+    });
+  }
+  loadUserFollowing(userId: number): Observable<User[]> {
+    return this.http.get<User[]>(`http://localhost:8080/api/users/following/${userId}`).pipe(
+      tap(users => this.following = users),
+      catchError(err => {
+        console.error('Error fetching following users', err);
+        this.following = [];
+        return of([]);
+      })
+    );
+  }
 // Možeš zadržati closeComments metodu ako je koristiš negde drugde,
 // ali dugme "Zatvori komentare" sada poziva nju direktno.
 

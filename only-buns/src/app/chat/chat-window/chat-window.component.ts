@@ -28,8 +28,19 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   @Input() chatRoomId!: number;
   @Input() chatRoomName!: string;
   @Output() closeWindow = new EventEmitter<number>();
-
-
+  @Output() openMemberManager = new EventEmitter<{ 
+    roomId: number; 
+    currentUserId: number; 
+    currentMembers: User[] 
+  }>();
+  
+  emitOpenMemberManager() {
+    this.openMemberManager.emit({
+      roomId: this.chatRoomId,
+      currentUserId: this.currentUser.id,
+      currentMembers: this.currentMembers
+    });
+  }
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
 
@@ -70,7 +81,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.adminId = 0;
-          //console.error('❌ Greška pri dohvatanju admin ID-ja:', err);
+          console.error('❌ Greška pri dohvatanju admin ID-ja:', err);
+          
         }
       });
     }
@@ -102,6 +114,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     await this.loadCurrentUser();
     await this.loadMessages(this.chatRoomId);
     await this.loadParticipants();
+    this.getLastJoinTimestamp();
   }
   async loadParticipants() {
     this.chatService.getParticipants(this.chatRoomId).subscribe({
@@ -118,7 +131,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     });
   }
   async loadCurrentUser():Promise<void>{
-    console.log('deez');
+    //console.log('deez');
     if (typeof window !== 'undefined' && window.localStorage) {
       const token = localStorage.getItem("jwt") || '';
       const headers = new HttpHeaders({
@@ -133,19 +146,77 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     }
   }
 
+  // async loadMessages(roomId: number) {
+  //   this.chatService.getChatHistory(roomId).subscribe({
+  //     next: (messages) => {
+  //       this.messages = messages//.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  //       const subject = this.chatWebSocketService['messagesSubjects'].get(roomId);
+  //       if(subject) subject.next(this.messages);
+  //       console.log('loaded messages for room', roomId);
+  //       //this.scrollToBottom();
+  //     },
+  //     error: (err) => {
+  //       console.error('Failed to load messages:', err);
+  //     }
+  //   });
+  // }
   async loadMessages(roomId: number) {
     this.chatService.getChatHistory(roomId).subscribe({
       next: (messages) => {
-        this.messages = messages//.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-        const subject = this.chatWebSocketService['messagesSubjects'].get(roomId);
-        if(subject) subject.next(this.messages);
+        if (this.adminId && this.adminId !== 0) {
+          // Grupni chat sa adminom
+          this.chatService.getParticipantsMeta(roomId).subscribe({
+            next: (metaString) => {
+              if (!metaString) {
+                this.messages = messages;
+                this.pushMessagesToWebSocketSubject(roomId);
+                return;
+              }
+              // Parsiraj meta string i nadji poslednji timestamp za currentUser
+              const entries = metaString.split(';').filter(e => e.trim().length > 0);
+              let lastJoinTimestamp: string | null = null;
+              for (let i = entries.length - 1; i >= 0; i--) {
+                const [idStr, timestamp] = entries[i].split(',');
+                if (idStr === this.currentUser.id.toString()) {
+                  lastJoinTimestamp = timestamp;
+                  break;
+                }
+              }
+              if (!lastJoinTimestamp) {
+                this.messages = messages;
+                this.pushMessagesToWebSocketSubject(roomId);
+                return;
+              }
+              // Filtriraj poruke - prikazi samo one koje su unutar 10 poruka pre i sve posle join-a
+              const joinTime = new Date(lastJoinTimestamp).getTime();
+              // Uzmi poruke koje su pre join timestamp (ali max 10) i sve koje su posle
+              const beforeJoin = messages.filter(m => new Date(m.timestamp).getTime() < joinTime);
+              const beforeJoinLast10 = beforeJoin.slice(-10); // poslednjih 10 pre join
+              const afterJoin = messages.filter(m => new Date(m.timestamp).getTime() >= joinTime);
+              this.messages = [...beforeJoinLast10, ...afterJoin];
+              this.pushMessagesToWebSocketSubject(roomId);
+            },
+            error: (err) => {
+              console.error('Error fetching participants meta', err);
+              this.messages = messages;
+              this.pushMessagesToWebSocketSubject(roomId);
+            }
+          });
+        } else {
+          // Nije grupni chat ili nema admina - prikazi sve
+          this.messages = messages;
+          this.pushMessagesToWebSocketSubject(roomId);
+        }
         console.log('loaded messages for room', roomId);
-        //this.scrollToBottom();
       },
       error: (err) => {
         console.error('Failed to load messages:', err);
       }
     });
+  }
+  pushMessagesToWebSocketSubject(roomId: number) {
+    const subject = this.chatWebSocketService['messagesSubjects'].get(roomId);
+    if(subject) subject.next(this.messages);
   }
   isSending = false;
   // sendMessage() {
@@ -236,13 +307,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     }, 0); // timeout osigurava da Angular prvo renderuje poruke
   }
 
-  openMemberManager() {
-    //this.currentMembers = [...this.chatRoom.participants];
-    this.showMemberModal = true;
-    // setTimeout(() => {
-    //   this.showMemberModal = true;
-    // });
-  }
   
   closeMemberManager() {
     this.showMemberModal = false;
@@ -273,7 +337,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
 
-
+  formatTimestamp(timestamp: string): string {
+    const date = new Date(timestamp);
+    const time = date.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = date.toLocaleDateString('sr-RS'); // D.M.YYYY
+    return `${time} · ${dateStr}`;
+  }
 
   createGroupChat() {
     this.chatService.createGroupChat('nev').subscribe({
@@ -326,7 +395,39 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
 
-
+  getLastJoinTimestamp(): void {
+    this.chatService.getParticipantsMeta(this.chatRoomId).subscribe({
+      next: (metaString) => {
+        if (!metaString) {
+          console.log('No participants meta data');
+          return;
+        }
+        // Splituj po ; da dobijemo svaku instancu
+        const entries = metaString.split(';').filter(e => e.trim().length > 0);
+  
+        // Nađi poslednju instancu gde id === currentUserId (kao string)
+        let lastTimestamp: string | null = null;
+  
+        for (let i = entries.length - 1; i >= 0; i--) {
+          const [idStr, timestamp] = entries[i].split(',');
+          if (idStr === this.currentUser.id.toString()) {
+            lastTimestamp = timestamp;
+            break;
+          }
+        }
+  
+        if (lastTimestamp) {
+          console.log(`User ${this.currentUser.id} last joined at ${lastTimestamp}`);
+          // Ovde možeš da setuješ u varijablu ili dalje radiš šta treba
+        } else {
+          console.log(`User ${this.currentUser.id} never joined`);
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching participants meta', err);
+      }
+    });
+  }
 
 
 

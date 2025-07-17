@@ -322,7 +322,7 @@ export class ChatService {
   createGroupChat(groupName: string): Observable<ChatRoom> {
     return this.http.post<ChatRoom>(
       `${this.apiUrl}/rooms/group/create`,
-      { name: 'nova chat grupa' },
+      { name: groupName },
       { headers: this.getAuthHeaders() }
     );
   }
@@ -330,6 +330,14 @@ export class ChatService {
   addUserToGroup(roomId: number, userId: number): Observable<ChatRoom> {
     return this.http.post<ChatRoom>(
       `${this.apiUrl}/rooms/group/${roomId}/add`,
+      { userId },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  removeUserFromGroup(roomId: number, userId: number): Observable<ChatRoom> {
+    return this.http.post<ChatRoom>(
+      `${this.apiUrl}/rooms/group/${roomId}/remove`,
       { userId },
       { headers: this.getAuthHeaders() }
     );
@@ -360,9 +368,19 @@ export class ChatService {
 
 
   getAdminId(chatRoomId: number): Observable<number> {
-    return this.http.get<number>(`http://localhost:8080/api/chat/${chatRoomId}/adminId`) || 0;
+    try{
+      return this.http.get<number>(`http://localhost:8080/api/chat/${chatRoomId}/adminId`) || 0
+    }
+    catch{
+      return this.http.get<number>(`http://localhost:8080/api/chat/${chatRoomId}/adminId`) || 0;
+    }  
   }
 
+  getParticipantsMeta(roomId: number): Observable<string> {
+    return this.http.get(`http://localhost:8080/api/chat/${roomId}/participants-meta`, {
+      responseType: 'text' // ovo je ključno da bi Angular tretirao odgovor kao običan tekst
+    });
+  }
   /**
    * Pomoćna funkcija za centralizovano rukovanje HTTP greškama.
    * @param error - Objekat greške koji vraća HttpClient.

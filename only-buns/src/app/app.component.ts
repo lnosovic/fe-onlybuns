@@ -11,6 +11,9 @@ import { ChatUiService } from './chat/chat.ui.service';
 import { ChatService } from './chat/chat.service';
 import { ChatWebSocketService } from './chat/chat.websocket.service';
 import { filter, skip } from 'rxjs';
+import { AdminDashboardComponent } from "./admin/admin-dashboard/admin-dashboard.component";
+import { MemberManagerComponent } from "./chat/member-manager/member-manager.component";
+import { User } from './user/models/user.model';
 
 // Interfejs za otvoren prozor chata - SA pozicionim podacima
 interface OpenChatWindow {
@@ -30,12 +33,36 @@ interface OpenChatWindow {
     CommonModule,
     ChatWidgetComponent,
     ChatWindowComponent,
-    NavbarComponent
-  ],
+    NavbarComponent,
+    AdminDashboardComponent,
+    MemberManagerComponent
+],
 })
 export class AppComponent implements OnInit{
   title = 'only-buns';
 
+
+  showMemberManager = false;
+
+  memberData: {
+    roomId: number;
+    currentUserId: number;
+    currentMembers: User[];
+  } | null = null;
+
+  // Handler za event iz chat-window
+  handleMemberManager(data: { roomId: number; currentUserId: number; currentMembers: User[] }) {
+    console.log('setting md');
+    console.log(data);
+    this.memberData = data;
+    this.showMemberManager = true;
+  }
+
+  closeMemberManager() {
+    this.showMemberManager = false;
+    this.memberData = null;
+  }
+  
   openChatWindows: OpenChatWindow[] = [];
   firstInit = true;
   // Pomoćne promenljive za izračunavanje pozicije (koriste se u TS logici)
@@ -89,6 +116,12 @@ export class AppComponent implements OnInit{
           });
 
       }
+      const currentRoomIds = new Set(this.chatService.myChatRooms$.value.map(r => r.id));
+      const invalidWindows = this.openChatWindows.filter(w => !currentRoomIds.has(w.id));
+      for (const w of invalidWindows) {
+        console.warn(`Zatvaram prozor sobe ${w.name} jer korisnik više nije član.`);
+        this.chatUi.closeWindow(w.id);
+      }
     });
   }
 
@@ -131,6 +164,9 @@ export class AppComponent implements OnInit{
 
   isAuthenticated(){
     return this.authService.isAuthenticated();
+  }
+  isAdmin(){
+    return this.authService.isAdmin();
   }
 
   /**

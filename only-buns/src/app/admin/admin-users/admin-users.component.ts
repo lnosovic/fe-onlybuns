@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, NgModule, OnInit } from '@angular/core';
 import { User } from '../../user/models/user.model';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaderResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 
@@ -92,10 +92,14 @@ export class AdminUsersComponent implements OnInit{
     params = params.set('page', (this.criteria.page ?? 0).toString());
     params = params.set('size', (this.criteria.size ?? 5).toString());
   
-    console.log('Query:', params.toString()); // Debug: vidi rezultat
-  
+    //console.log('Query:', params.toString()); // Debug: vidi rezultat
+    const token = localStorage.getItem("jwt") || '';
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
+    });
     this.http
-      .get<any>('http://localhost:8080/api/users/search?' + params.toString())
+      .get<any>('http://localhost:8080/api/users/search?' + params.toString(), {headers})
       .subscribe({
         next: res => {
           this.users = res.content;
