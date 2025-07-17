@@ -19,9 +19,24 @@
       class="input input-bordered w-full" />
     <p class="text-red-500 text-sm" *ngIf="submitted && f.surname.errors?.['required']">Surname is required.</p>
   </div>
-
+<!-- CHANGE PASSWORD TOGGLE -->
+      <div class="form-control">
+        <label class="label cursor-pointer justify-start gap-4">
+          <span class="label-text">Change Password</span> 
+          <!-- 
+            FIX 1: Added a styled toggle switch.
+            FIX 2: Added [ngModelOptions]="{standalone: true}" to prevent conflict with formGroup.
+          -->
+          <input 
+            type="checkbox" 
+            class="toggle toggle-primary" 
+            [(ngModel)]="changePassword" 
+            [ngModelOptions]="{standalone: true}"
+            (change)="togglePasswordChange()" />
+        </label>
+      </div>
   <!-- PASSWORD -->
-  <div>
+  <div *ngIf="changePassword">
     <label class="label">
       <span class="label-text">Password</span>
     </label>
@@ -31,7 +46,7 @@
   </div>
 
   <!-- CONFIRM PASSWORD -->
-  <div>
+  <div *ngIf="changePassword">
     <label class="label">
       <span class="label-text">Confirm Password</span>
     </label>

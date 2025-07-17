@@ -73,7 +73,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       console.log(
         'You clicked the map at latitude: ' + coord.lat + ' and longitude: ' + coord.lng
       );
-      this.currentMarker=new L.Marker([coord.lat, coord.lng]).addTo(this.map);
+      this.currentMarker = L.marker([coord.lat, coord.lng], { icon: this.getCustomMarkerIcon() }).addTo(this.map);
       this.reverseSearch(coord.lat, coord.lng).subscribe({
       next: (result) => {
         const address = result?.address;
@@ -113,9 +113,23 @@ export class MapComponent implements AfterViewInit, OnChanges {
       this.map.removeLayer(this.currentMarker);
     }
 
-    this.currentMarker = L.marker([location.latitude, location.longitude])
-      .addTo(this.map)
+    this.currentMarker = L.marker([location.latitude, location.longitude], {
+  icon: this.getCustomMarkerIcon()
+}).addTo(this.map);
 
     this.map.setView([location.latitude, location.longitude], 13); // centriraj mapu
   }
+  private getCustomMarkerIcon(): L.DivIcon {
+  return L.divIcon({
+    className: '',
+    html: `
+      <div class="w-8 h-8  rounded-full flex items-center justify-center text-white text-xl">
+        📍
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+}
 }
