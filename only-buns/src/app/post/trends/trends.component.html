@@ -1,21 +1,39 @@
-<div class="trends-container p-6 bg-base-100 rounded-box shadow-md h-[calc(100vh-4rem)] flex flex-col">
+<div class="trends-container p-6 bg-base-100 rounded-box  h-[calc(100vh-4rem)] flex flex-col">
   <!-- Title -->
   <h1 class="text-4xl font-bold text-center text-primary mb-4 shrink-0">Trends</h1>
 
   <!-- Summary Stats -->
   <div class="summary flex flex-wrap justify-center gap-6 mb-4 shrink-0">
-  <div class="card w-64 bg-base-200 shadow-md">
-    <div class="card-body p-4 text-center">
-      <h2 class="text-md font-semibold text-secondary">Total Posts</h2>
-      <p class="text-2xl font-bold text-primary">{{ countAllPosts }}</p>
+
+  <!-- Kartica za ukupan broj postova -->
+  <ng-container *ngIf="countAllPosts !== null; else loadingCard">
+    <div class="card w-64 bg-base-200 shadow-md">
+      <div class="card-body p-4 text-center">
+        <h2 class="text-md font-semibold text-secondary">Total Posts</h2>
+        <p class="text-2xl font-bold text-primary">{{ countAllPosts }}</p>
+      </div>
     </div>
-  </div>
-  <div class="card w-64 bg-base-200 shadow-md">
-    <div class="card-body p-4 text-center">
-      <h2 class="text-md font-semibold text-secondary">Posts This Month</h2>
-      <p class="text-2xl font-bold text-primary">{{ countAllPostsThisMonth }}</p>
+  </ng-container>
+
+  <!-- Kartica za postove ovog meseca -->
+  <ng-container *ngIf="countAllPostsThisMonth !== null; else loadingCard">
+    <div class="card w-64 bg-base-200 shadow-md">
+      <div class="card-body p-4 text-center">
+        <h2 class="text-md font-semibold text-secondary">Posts This Month</h2>
+        <p class="text-2xl font-bold text-primary">{{ countAllPostsThisMonth }}</p>
+      </div>
     </div>
-  </div>
+  </ng-container>
+
+  <!-- Opciono: Prikaz dok se podaci učitavaju -->
+  <ng-template #loadingCard>
+    <div class="card w-64 bg-base-200 shadow-md animate-pulse">
+      <div class="card-body p-4 text-center">
+        <div class="h-5 bg-gray-300 rounded w-3/4 mx-auto mb-2"></div>
+        <div class="h-8 bg-gray-400 rounded w-1/2 mx-auto"></div>
+      </div>
+    </div>
+  </ng-template>
 </div>
   <!-- Tabs -->
   <div role="tablist" class="tabs tabs-boxed mb-4 justify-center shrink-0 sticky top-0 bg-base-100 z-10 shadow-md rounded-lg px-2">
@@ -55,7 +73,7 @@
 </div>
 
   <!-- Scrollable Content -->
-  <div class="overflow-y-auto grow px-1">
+  <!-- <div class="overflow-y-auto grow px-1"> -->
 
  <div *ngIf="activeTab === 'top5Posts'">
       <div class="flex flex-col items-center gap-6">
