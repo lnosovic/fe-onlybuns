@@ -75,54 +75,57 @@ export class AppComponent implements OnInit{
     private chatService: ChatService) { }
 
   ngOnInit() {
-    this.chatUi.openWindows$.subscribe(ws => (this.openChatWindows = ws));
-    // this.wsService.messageSubjects$.subscribe((message) => {
-    //   console.log('💬 Nova poruka:', message);
-    //   this.chatService.refreshMyChatRooms();
-    // });
-    this.chatService.refreshMyChatRooms();
-    this.chatService.subscribeToNewRooms();
-    
-    this.chatService.newRoom$.subscribe(roomId => {
-      if (roomId) {
-        this.chatService.refreshMyChatRooms();
-      }
-    });
-    //ne pitaj
-    this.chatService.refreshMyChatRooms();
-    this.chatService.refreshCompleted.subscribe(() => {
-      // sve sobe su učitane i pretplate su postavljene
-      // možemo slušati poruke iz svih soba
-      for (const room of this.chatService.myChatRooms$.value) {
-        this.chatWebSocketService
-          .subscribeToRoom(room.id)
-          .pipe(skip(1))          //da se prvi put ne otvore sve xd
-          .subscribe((messages) => {
-            const latest = messages[messages.length - 1];
-            if (!this.chatUi.isChatWindowOpen(room.id)) {
-              const updatedRooms = this.chatService.myChatRooms$.value.map(r =>
-                r.id === room.id ? { ...r } : r
-              );
-              this.chatService.myChatRooms$.next(updatedRooms);
+    if(this.authService.isAuthenticated()){
+      this.chatUi.openWindows$.subscribe(ws => (this.openChatWindows = ws));
+      // this.wsService.messageSubjects$.subscribe((message) => {
+      //   console.log('💬 Nova poruka:', message);
+      //   this.chatService.refreshMyChatRooms();
+      // });
+      this.chatService.refreshMyChatRooms();
+      this.chatService.subscribeToNewRooms();
+      
+      this.chatService.newRoom$.subscribe(roomId => {
+        if (roomId) {
+          this.chatService.refreshMyChatRooms();
+        }
+      });
+      //ne pitaj
+      this.chatService.refreshMyChatRooms();
+      this.chatService.refreshCompleted.subscribe(() => {
+        // sve sobe su učitane i pretplate su postavljene
+        // možemo slušati poruke iz svih soba
+        for (const room of this.chatService.myChatRooms$.value) {
+          this.chatWebSocketService
+            .subscribeToRoom(room.id)
+            .pipe(skip(1))          //da se prvi put ne otvore sve xd
+            .subscribe((messages) => {
+              const latest = messages[messages.length - 1];
+              if (!this.chatUi.isChatWindowOpen(room.id)) {
+                const updatedRooms = this.chatService.myChatRooms$.value.map(r =>
+                  r.id === room.id ? { ...r } : r
+                );
+                this.chatService.myChatRooms$.next(updatedRooms);
 
-              const roomToOpen = {
-                id: room.id,
-                name: room.name || '?'
-              };
+                const roomToOpen = {
+                  id: room.id,
+                  name: room.name || '?'
+                };
 
-                console.log('otvara');
-                this.chatUi.openWindow(roomToOpen);
-            }
-          });
+                  console.log('otvara');
+                  this.chatUi.openWindow(roomToOpen);
+              }
+            });
 
-      }
-      const currentRoomIds = new Set(this.chatService.myChatRooms$.value.map(r => r.id));
-      const invalidWindows = this.openChatWindows.filter(w => !currentRoomIds.has(w.id));
-      for (const w of invalidWindows) {
-        console.warn(`Zatvaram prozor sobe ${w.name} jer korisnik više nije član.`);
-        this.chatUi.closeWindow(w.id);
-      }
-    });
+        }
+        const currentRoomIds = new Set(this.chatService.myChatRooms$.value.map(r => r.id));
+        const invalidWindows = this.openChatWindows.filter(w => !currentRoomIds.has(w.id));
+        for (const w of invalidWindows) {
+          console.warn(`Zatvaram prozor sobe ${w.name} jer korisnik više nije član.`);
+          this.chatUi.closeWindow(w.id);
+        }
+      });
+    }
+ 
   }
 
   /**

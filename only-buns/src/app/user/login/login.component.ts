@@ -48,7 +48,9 @@ export class LoginComponent implements OnInit{
         next:()=>{
             this.loginErrorMessage = null;
           console.log('Login successful');
-          this.router.navigate(['home']);
+          this.router.navigate(['home']).then(() => {
+            window.location.reload(); // brutalno, ali osigurava da app.component se sveže inicijalizuje sa tokenom
+         });
         },
         error: (err) => {
           if(err.status===429){
