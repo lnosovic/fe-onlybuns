@@ -1,15 +1,57 @@
-<div class="nav-bar">
-    <h1>ONLYBUNS</h1>
-    <div class="router">
-        <button (click)="posts()" class="router-button">Posts</button>
-        <button (click)="profile()" class="router-button" *ngIf="getToken()!==null">Profile</button>
-        <button (click)="trends()" class="router-button"  *ngIf="getToken()!==null">Trends</button>
-        <button (click)="map1()" class="router-button">Map</button>
-        <button (click)="map()" class="router-button" *ngIf="getToken()!==null">Map</button>
-    </div>
-    
-    <div class="login-logout">
-        <button (click)="login()" class="logic-button" *ngIf="getToken()===null">Login</button>
-        <button (click)="logout()"class="logic-button" *ngIf="getToken()!==null">Logout</button>
-    </div>
+<div class="fixed top-0 left-0 z-50 flex h-16 w-full items-center justify-end border-b border-base-300 bg-base-100 px-6">
+  <div *ngIf="getToken() === null">
+    <button (click)="login()" class="btn btn-primary">Login</button>
+  </div>
+  <div *ngIf="getToken() !== null">
+    <button (click)="logout()" class="btn btn-ghost">Logout</button>
+  </div>
 </div>
+
+<!-- 
+  Bočna traka za navigaciju (Sidebar)
+  - 'fixed left-0': Fiksira je uz lijevi rub.
+  - 'top-16': KLJUČNA PROMJENA - Spušta traku za visinu gornje trake (h-16 = 4rem).
+  - 'w-[20%]': Širina je postavljena na 20% širine ekrana.
+  - 'h-screen': Zauzima punu visinu ekrana.
+  - 'z-40': Niži z-index od gornje trake.
+-->
+<aside class="fixed left-0 top-16 z-40 flex h-screen w-[20%] flex-col border-r border-base-300 bg-base-100 px-4 py-6">
+  <!-- Naslov/Logo -->
+  <h1 class="mb-10 pl-2 text-3xl font-bold text-base-content">ONLYBUNS</h1>
+
+  <!-- Spremnik za navigacijske linkove -->
+  <div class="flex flex-grow flex-col gap-4">
+    <a
+      routerLink="/posts"
+      routerLinkActive="bg-base-300"
+      [routerLinkActiveOptions]="{exact: true}"
+      class="w-full rounded-lg px-4 py-3 text-lg font-semibold text-base-content transition-all hover:bg-base-200"
+    >
+      Posts
+    </a>
+    <a
+      *ngIf="getToken() !== null"
+      [routerLink]="['/profile', currentUser?.id]" 
+      routerLinkActive="bg-base-300"
+      class="w-full rounded-lg px-4 py-3 text-lg font-semibold text-base-content transition-all hover:bg-base-200"
+    >
+      Profile
+    </a>
+    <a
+      *ngIf="getToken() !== null"
+      routerLink="/trends"
+      routerLinkActive="bg-base-300"
+      class="w-full rounded-lg px-4 py-3 text-lg font-semibold text-base-content transition-all hover:bg-base-200"
+    >
+      Trends
+    </a>
+    <a
+      *ngIf="getToken() !== null"
+      routerLink="/posts-map"
+      routerLinkActive="bg-base-300"
+      class="w-full rounded-lg px-4 py-3 text-lg font-semibold text-base-content transition-all hover:bg-base-200"
+    >
+      Map
+    </a>
+  </div>
+</aside>

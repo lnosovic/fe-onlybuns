@@ -27,8 +27,8 @@ export const routes: Routes = [
     { path: 'posts-map', component:PostsMapComponent},
     { path: 'admin', component: AdminDashboardComponent, canActivate: [AdminGuard] }, 
   //  { path: 'admin/users', component: AdminUsersComponent, canActivate: [AdminGuard]},
-    { path: 'admin/users', component: AdminUsersComponent},
-    { path: 'admin/analytics', component: AnalyticsComponent},// <-- DODAJ canActivate: [AdminGuard]
+    { path: 'admin/users', component: AdminUsersComponent, canActivate: [AdminGuard]},
+    { path: 'admin/analytics', component: AnalyticsComponent, canActivate: [AdminGuard]},// <-- DODAJ canActivate: [AdminGuard]
     { path: 'post/:id', component: PostDetailsComponent },
     { path: 'edit-profile', component: EditProfileComponent},
 

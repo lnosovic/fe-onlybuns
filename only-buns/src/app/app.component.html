@@ -1,5 +1,7 @@
 <app-navbar></app-navbar>
-<router-outlet></router-outlet>
+<main class=" pt-16 p-8">
+  <router-outlet></router-outlet>
+</main>
 <app-admin-dashboard *ngIf="isAdmin()"></app-admin-dashboard>
 
 <app-chat-widget class="z-10" *ngIf="isAuthenticated()" (openChatRoom)="handleOpenChatRoom($event)"></app-chat-widget>
