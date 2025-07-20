@@ -2,9 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Post } from '../models/post.model';
 import { User } from '../../user/models/user.model';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { subscribe } from 'diagnostics_channel';
 import { Router } from '@angular/router';
+import { PostService } from '../post.service'; // PostService je sada ispravno uvezen
 
 @Component({
   selector: 'app-trends',
@@ -29,13 +30,13 @@ export class TrendsComponent implements OnInit{
     followerCount: 0,
     followingCount: 0
   }
-  countAllPosts:Number=0;
-  countAllPostsThisMonth:Number=0;
+   countAllPosts: number | null = null;
+  countAllPostsThisMonth: number | null = null;
   isPostModalOpen :boolean=false;
   showComments:boolean=false;
   usernames: {[userId:number]:string}={};
-  activeTab: string = 'top5Posts';
-  constructor(private http: HttpClient,private router:Router){}
+  activeTab: string | null = null;
+  constructor(private http: HttpClient,private router:Router, private postService: PostService){}
   ngOnInit(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       const token = localStorage.getItem("jwt") || '';
@@ -71,6 +72,7 @@ export class TrendsComponent implements OnInit{
       next:(posts)=>{
         this.posts = posts;
         this.posts.forEach(post=>this.fetchUsername(post.userId));
+        this.checkInitialLikeStatus();
       },
       error: (err) => console.error('Error fetching posts:', err)
     })
@@ -88,6 +90,8 @@ export class TrendsComponent implements OnInit{
       next:(posts)=>{
         this.posts = posts;
         this.posts.forEach(post=>this.fetchUsername(post.userId));
+        this.checkInitialLikeStatus();
+        console.log(posts);
       },
       error: (err) => console.error('Error fetching posts:', err)
     })
@@ -117,7 +121,7 @@ export class TrendsComponent implements OnInit{
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json',
     });
-    this.http.get<Number>(`http://localhost:8080/api/posts/countAllPosts`,{headers}).subscribe({
+    this.http.get<number>(`http://localhost:8080/api/posts/countAllPosts`,{headers}).subscribe({
       next:(res)=>{
         console.log(res);
         this.countAllPosts=res;
@@ -133,7 +137,7 @@ export class TrendsComponent implements OnInit{
       'Accept': 'application/json',
     });
     console.log(token)
-    this.http.get<Number>(`http://localhost:8080/api/posts/countLastMonthPosts`,{headers}).subscribe({
+    this.http.get<number>(`http://localhost:8080/api/posts/countLastMonthPosts`,{headers}).subscribe({
       next:(res)=>{
         this.countAllPostsThisMonth=res;
       },
@@ -182,4 +186,76 @@ export class TrendsComponent implements OnInit{
     else
       this.loadTop10UsersLast7Days();
   }
+  toggleLike(post: Post): void {
+    // Proveri da li je korisnik ulogovan pre nego što pokuša da lajkuje/dislajkuje
+    if (!this.currentUser || this.currentUser.id === 0 || (this.currentUser.role.name !== 'ROLE_USER' && this.currentUser.role.name !== 'ROLE_ADMIN')) {
+        alert('Morate biti ulogovani da biste lajkovali objave!');
+        this.router.navigate(['/login']); // Preusmeri na login
+        return;
+    }
+
+    if (post.isLikedByUser) {
+      // Ako je već lajkovano, dislajkuj
+      this.postService.unlikePost(post.id).subscribe({
+        next: () => {
+          post.isLikedByUser = false; // Ažuriraj UI
+          post.likes--; // Smanji broj lajkova na UI
+          console.log(`Dislajkovao post ${post.id}`);
+        },
+        error: (err: Error) => {
+          console.error(`Greška pri dislajkovanju posta ${post.id}:`, err);
+          alert('Došlo je do greške prilikom dislajkovanja.');
+        }
+      });
+    } else {
+      // Ako nije lajkovano, lajkuj
+      this.postService.likePost(post.id).subscribe({
+        next: () => {
+          post.isLikedByUser = true; // Ažuriraj UI
+          post.likes++; // Povećaj broj lajkova na UI
+          console.log(`Lajkovao post ${post.id}`);
+        },
+        error: (err: Error) => {
+          console.error(`Greška pri lajkovanju posta ${post.id}:`, err);
+          alert('Došlo je do greške prilikom lajkovanja.');
+        }
+      });
+    }
+  }
+   toggleComments(post: any) {
+    if (this.showComments && this.selectedPost === post) {
+      // Ako su komentari već otvoreni za ovu objavu, zatvori ih
+      this.showComments = false;
+      this.selectedPost = null;
+    } else {
+      // Inače, otvori komentare za ovu objavu
+      this.showComments = true;
+      this.selectedPost = post;
+    }
+  }
+   checkInitialLikeStatus(): void {
+      if (!this.currentUser || this.currentUser.id === 0) { // Ako currentUser nije učitan ili je ID 0, preskoči
+          console.warn("Korisnik nije ulogovan ili currentUser.id je 0. Ne mogu proveriti status lajkova.");
+          // Postavi sve na false po defaultu ako korisnik nije ulogovan
+          this.posts.forEach(post => post.isLikedByUser = false);
+          return;
+      }
+  
+      this.posts.forEach(post => {
+        this.postService.isPostLikedByUser(post.id).subscribe({
+          next: (isLiked: boolean) => {
+            post.isLikedByUser = isLiked;
+          },
+          error: (error: Error) => {
+            // Rukovanje greškama kada je isPostLikedByUser bez pipe()
+            console.error(`Greška pri proveri lajka za post ${post.id} u komponenti:`, error);
+            if (error instanceof HttpErrorResponse && error.status === 404) {
+              post.isLikedByUser = false; // Post ili korisnik nisu pronađeni, smatraj da nije lajkovano
+            } else {
+              post.isLikedByUser = false; // Za ostale greške, takođe smatraj da nije lajkovano
+            }
+          }
+        });
+      });
+    }
 }

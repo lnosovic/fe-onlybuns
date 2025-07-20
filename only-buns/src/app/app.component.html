@@ -1,2 +1,33 @@
 <app-navbar></app-navbar>
-<router-outlet></router-outlet>
+<main class=" pt-16 p-8">
+  <router-outlet></router-outlet>
+</main>
+<app-admin-dashboard *ngIf="isAdmin()"></app-admin-dashboard>
+
+<app-chat-widget class="z-10" *ngIf="isAuthenticated()" (openChatRoom)="handleOpenChatRoom($event)"></app-chat-widget>
+
+<div>
+  <app-chat-window
+  *ngFor="let w of openChatWindows"
+  [chatRoomId]="w.id"
+  [chatRoomName]="w.name"
+  [style.right.px]="w.position.right"
+  [style.bottom.px]="w.position.bottom"
+  (closeWindow)="handleCloseChatWindow($event)"
+  (openMemberManager)="handleMemberManager($event)"
+  class="fixed z-40">
+</app-chat-window>
+</div>
+
+
+<div *ngIf="showMemberManager && memberData"
+     class="fixed inset-0 z-[100] bg-black bg-opacity-50 flex items-center justify-center">
+  
+  <app-member-manager
+    class="z-[200]"
+    [chatRoomId]="memberData.roomId"
+    [currentUserId]="memberData.currentUserId"
+    [currentMembers]="memberData.currentMembers"
+    (close)="closeMemberManager()">
+  </app-member-manager>
+</div>

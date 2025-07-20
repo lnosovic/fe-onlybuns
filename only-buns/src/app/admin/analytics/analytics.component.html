@@ -1,0 +1,82 @@
+<div class="w-full flex justify-center mt-8" *ngIf="!loading; else loadingTemplate">
+    <div class="w-full max-w-2xl">
+  
+      <div class="card bg-base-100 shadow-md p-6 space-y-6">
+        <h2 class="text-2xl font-semibold">Analytics</h2>
+  
+        <!-- Sekcija: Broj objava -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="stat bg-base-200 rounded-box">
+            <div class="stat-title">Posts (weekly)</div>
+            <div class="stat-value text-primary">{{ postsWeekly !== null ? postsWeekly : '--' }}</div>
+          </div>
+          <div class="stat bg-base-200 rounded-box">
+            <div class="stat-title">Posts (monthly)</div>
+            <div class="stat-value text-primary">{{ postsMonthly !== null ? postsMonthly : '--' }}</div>
+          </div>
+          <div class="stat bg-base-200 rounded-box">
+            <div class="stat-title">Posts (yearly)</div>
+            <div class="stat-value text-primary">{{ postsYearly !== null ? postsYearly : '--' }}</div>
+          </div>
+        </div>
+  
+        <!-- Sekcija: Broj komentara -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="stat bg-base-200 rounded-box">
+            <div class="stat-title">Comments (weekly)</div>
+            <div class="stat-value text-primary">{{ commentsWeekly !== null ? commentsWeekly : '--' }}</div>
+          </div>
+          <div class="stat bg-base-200 rounded-box">
+            <div class="stat-title">Comments (monthly)</div>
+            <div class="stat-value text-primary">{{ commentsMonthly !== null ? commentsMonthly : '--' }}</div>
+          </div>
+          <div class="stat bg-base-200 rounded-box">
+            <div class="stat-title">Comments (yearly)</div>
+            <div class="stat-value text-primary">{{ commentsYearly !== null ? commentsYearly : '--' }}</div>
+          </div>
+        </div>
+  
+            <!-- Section: Radial Chart -->
+            <div class="mt-10 space-y-6" *ngIf="userActivity">
+                <h3 class="text-xl font-semibold text-center">User Activity Overview</h3>
+            
+                <!-- User Activity Percentages -->
+                <div class="flex justify-center">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-xl text-center">
+                    <div class="stat bg-base-200 rounded-box shadow">
+                    <div class="stat-title text-base">Users with Posts</div>
+                    <div class="stat-value text-primary">{{ userActivity.percentWithPosts | number:'1.0-2' }}%</div>
+                    </div>
+                    <div class="stat bg-base-200 rounded-box shadow">
+                    <div class="stat-title text-base">Only Commented</div>
+                    <div class="stat-value text-primary">{{ userActivity.percentWithOnlyComments | number:'1.0-2' }}%</div>
+                    </div>
+                    <div class="stat bg-base-200 rounded-box shadow">
+                    <div class="stat-title text-base">No Activity</div>
+                    <div class="stat-value text-neutral">{{ userActivity.percentInactive | number:'1.0-2' }}%</div>
+                    </div>
+                </div>
+                </div>
+            
+                <!-- Radial Chart -->
+                <div class="flex justify-center">
+                <div class="bg-base-200 rounded-box shadow p-6 w-fit">
+                    <canvas #radialChartCanvas width="300" height="300"></canvas>
+                </div>
+                </div>
+            </div>
+      </div>
+  
+    </div>
+  </div>
+  
+  <ng-template #loadingTemplate>
+    <div class="w-full flex justify-center mt-8">
+      <div class="text-gray-500">Loading...</div>
+    </div>
+  </ng-template>
+  
+  <!-- Prikaz greške -->
+  <div *ngIf="error" class="w-full flex justify-center mt-8 text-red-600 font-semibold">
+    {{ error }}
+  </div>

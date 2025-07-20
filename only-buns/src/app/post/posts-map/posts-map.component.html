@@ -1,3 +1,25 @@
-<div class="map-frame">
-    <div id="map"></div>
+<div class="w-full flex justify-center">
+
+  <!-- 
+    Okvir mape (zamjenjuje vaš .map-frame)
+    - 'w-full': Zauzima 100% širine roditeljskog elementa.
+    - 'max-w-screen-2xl': Ograničava maksimalnu širinu na ultra-širokim ekranima radi čitljivosti.
+    - 'border-2 border-base-300': DaisyUI/Tailwind klasa za okvir, konzistentna s ostatkom dizajna.
+    - 'rounded-lg': Zaobljeni rubovi za ljepši izgled.
+    - 'shadow-lg': Dodaje suptilnu sjenu za osjećaj dubine.
+    - 'overflow-hidden': Važno, osigurava da sadržaj mape ne "iscuri" izvan zaobljenih rubova.
+  -->
+  <div class="w-full max-w-screen-2xl rounded-lg border-2 border-base-300 shadow-lg overflow-hidden">
+    
+    <!-- 
+      Vaš #map element
+      - Uklonili smo SVE stare CSS stilove.
+      - 'h-[80vh]': Visina je postavljena na 80% visine prozora (viewport height). 
+                     Ovo je responzivnije od fiksne vrijednosti u pikselima i osigurava da se mapa dobro vidi.
+                     Možete koristiti i fiksnu vrijednost poput 'h-[630px]'.
+      - 'w-full': Mapa će zauzeti 100% širine svog roditeljskog elementa (okvira).
+    -->
+    <div id="map" class="h-[90vh] w-full"></div>
+
   </div>
+</div>

@@ -1,15 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, provideExperimentalCheckNoChangesForDebug } from '@angular/core';
 import { User } from '../models/user.model';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Post } from '../../post/models/post.model';
 import { PostService } from '../../post/post.service';
+import { ChatService } from '../../chat/chat.service';
+import { firstValueFrom } from 'rxjs';
+import { ChatUiService } from '../../chat/chat.ui.service';
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -38,17 +43,90 @@ export class ProfileComponent implements OnInit {
   selectedPost:any=null;
   showComments=false;
   isHoveringUnfollow = false;
+
+
+
+  editingPostId: number | null = null;
+  editedDescription: string = '';
+
+  activePostMenu: any = null;
+
+  startEditing(post: Post): void {
+    this.editingPostId = post.id;
+    this.editedDescription = post.description;
   
-  constructor(private http:HttpClient,private activeRouter:ActivatedRoute,private router:Router, private postService: PostService){}
+    // mali delay da textarea postoji u DOM-u pa se tek onda fokusira
+    setTimeout(() => {
+      const input = document.querySelector('textarea') as HTMLTextAreaElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    });
+  }
+  
+  submitEdit(post: Post): void {
+    const trimmed = this.editedDescription.trim();
+    if (trimmed && trimmed !== post.description) {
+      this.postService.updateDescription(post.id, trimmed).subscribe({
+        next: (updated) => {
+          post.description = updated.description;
+          this.editingPostId = null;
+        },
+        error: () => {
+          console.error('Failed to update');
+          this.editingPostId = null;
+        }
+      });
+    } else {
+      this.editingPostId = null;
+    }
+  }
+  togglePostMenu(post: any) {
+    this.activePostMenu = this.activePostMenu === post ? null : post;
+  }
+
+  postToDelete: Post | null = null;
+  deletePost(post: Post): void {
+    this.postToDelete = post; // samo otvara modal
+  }
+  
+  confirmDelete(): void {
+    if (!this.postToDelete) return;
+  
+    this.postService.deletePost(this.postToDelete.id).subscribe({
+      next: () => {
+        this.posts = this.posts.filter(p => p.id !== this.postToDelete!.id);
+        this.postToDelete = null;
+      },
+      error: (err) => {
+        console.error('Failed to delete post', err);
+        this.postToDelete = null;
+      }
+    });
+  }
+  
+  cancelDelete(): void {
+    this.postToDelete = null;
+  }
+  
+  constructor(private http:HttpClient,private activeRouter:ActivatedRoute,private router:Router, private postService: PostService, private chatService: ChatService,
+    private chatUi: ChatUiService, private authService: AuthService
+  ){}
   ngOnInit(): void {
     this.activeRouter.params.subscribe(async params => {
 
         try{
           this.userId = +params['id'];
           this.loadUserInfo(this.userId); 
-          this.loadUserPosts(this.userId);
+          this.loadUserPosts(this.userId).then(() => {
+            this.loadCurrentUser().then(() => {
+              this.checkInitialLikeStatus();
+            })
+          });
           this.loadUserFollowers(this.userId);
           this.loadUserFollowing(this.userId);
+          //this.checkInitialLikeStatus();
           this.showFollowers=false;
           this.showFollowings=false;
         }catch{
@@ -57,7 +135,10 @@ export class ProfileComponent implements OnInit {
 
 
     });
-    this.loadCurrentUser();
+  }
+
+  isAdmin(){
+    return this.authService.isAdmin();
   }
   loadUserInfo(userId:number){
     this.http.get<User>(`http://localhost:8080/api/users/profile/${userId}`).subscribe({
@@ -67,18 +148,26 @@ export class ProfileComponent implements OnInit {
       error: (err) => console.error('Error fetching user:',err)
     });
   }
-  loadUserPosts(userId:number):void{
+  async loadUserPosts(userId:number): Promise<void>{
+   //console.log('loading user posts');
     if (typeof window !== 'undefined' && window.localStorage) {
       const token = localStorage.getItem("jwt");
       const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       });
-      this.http.get<Post[]>(`http://localhost:8080/api/posts/getAllUserPosts/${userId}`,{headers}).subscribe({
-        next:(posts)=>{
-          this.posts=posts;
-        }
-      })
+      // this.http.get<Post[]>(`http://localhost:8080/api/posts/getAllUserPosts/${userId}`,{headers}).subscribe({
+      //   next:(posts)=>{
+      //     //console.log(posts);
+      //     this.posts=posts;
+      //     console.log(this.posts);
+      //     return;
+      //   }
+      // })
+      const posts = await firstValueFrom(
+        this.http.get<Post[]>(`http://localhost:8080/api/posts/getAllUserPosts/${userId}`, { headers })
+      );
+      this.posts = posts;
     }
   }
   loadUserFollowers(userId:number){
@@ -103,28 +192,23 @@ export class ProfileComponent implements OnInit {
     this.selectedPost=post;
     this.isPostModalOpen=true;
   }
-  loadCurrentUser():void{
+  async loadCurrentUser():Promise<void>{
     if (typeof window !== 'undefined' && window.localStorage) {
       const token = localStorage.getItem("jwt") || '';
       const headers = new HttpHeaders({
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json',
       });
-  
-      if (token) {
-        this.http.get<User>('http://localhost:8080/api/users/userInfo', { headers }).subscribe({
-          next: (res) => {
-            this.currentUser = res;
-            console.log(this.currentUser)
-          },
-        });
+      if(token){
+        const currentUser = await firstValueFrom(this.http.get<User>('http://localhost:8080/api/users/userInfo', { headers }));
+        this.currentUser = currentUser;
       }
     }
   }
   viewProfile(userId:number){
     this.router.navigate(['profile',userId])
     this.isPostModalOpen=false;
-    console.log('plaki')
+    //console.log('plaki')
     
   }
   addComment(){
@@ -230,18 +314,22 @@ export class ProfileComponent implements OnInit {
       'Accept': 'application/json',
     });
 
-    this.http.post(`http://localhost:8080/api/users/${this.userProfile.id}/follow`, {}, { headers }).subscribe({
-      next: () => {
-        // if (this.userProfile) {
-        //   this.userProfile.followerCount = (this.userProfile.followerCount || 0) + 1;
-        // }
-        // console.log(`Uspešno praćenje korisnika ${this.userProfile?.username}`);
+    this.http.post(`http://localhost:8080/api/users/${this.userProfile.id}/follow`, {}, { headers, responseType: 'text' as const }).subscribe({
+      next: (response) => {
+        if (this.userProfile) {
+          this.userProfile.followerCount = this.userProfile.followerCount + 1;
+          console.log('Odgovor sa servera:', response);
+          if (this.currentUser && this.userProfile) {
+            this.followers.push(this.currentUser); // ili ceo user ako imaš
+          }
+        }
       },
       error: (err) => {
         console.error('Greška pri praćenju korisnika:', err);
-        alert('Došlo je do greške prilikom praćenja.');
+        //alert('Došlo je do greške prilikom praćenja.');
       }
     });
+
   }
 
   unfollowUser(): void {
@@ -264,6 +352,10 @@ export class ProfileComponent implements OnInit {
           this.userProfile.followerCount--;
         }
         console.log(`Uspešno prekinuto praćenje korisnika ${this.userProfile?.username}`);
+        if (this.currentUser && this.userProfile) {
+          this.followers = this.followers.filter((u:any) => u.id !== this.currentUser.id);
+          this.checkFollowingStatus();
+        }
       },
       error: (err) => {
         console.error('Greška pri prekidu praćenja korisnika:', err);
@@ -271,4 +363,110 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+
+  onBackdropClick(event: MouseEvent, type: 'followings' | 'followers') {
+    const target = event.target as HTMLElement;
+  
+    // Kliknut je direktno backdrop (a ne unutrašnji .modal-box)
+    if (target.classList.contains('modal')) {
+      if (type === 'followings') this.closeFollowings();
+      else if (type === 'followers') this.closeFollowers();
+    }
+  }
+  isMyProfile(){
+    if(this.currentUser){
+      if(this.currentUser.id === this.userProfile?.id){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  createPersonalChat(): void {
+    if (!this.userProfile || !this.userProfile.id) {
+      console.error('Greška: ID korisničkog profila nije dostupan.');
+      // Možeš prikazati poruku korisniku (npr. toast notifikaciju)
+      return;
+    }
+
+    // ID korisnika sa kojim želimo da kreiramo chat je userProfile.id
+    const otherUserId = this.userProfile.id;
+
+    console.log(`Pokušavam da kreiram personalni chat sa korisnikom ID: ${otherUserId}`);
+
+    this.chatService.createPersonalChat(otherUserId).subscribe({
+      next: (chatRoom) => {
+        console.log('Uspešno kreirana personalna chat soba:', chatRoom);
+        // Ovde možeš dodati logiku nakon uspešnog kreiranja chat sobe:
+        // 1. Preusmeri korisnika na stranicu sa tom chat sobom.
+        //    this.router.navigate(['/chat', chatRoom.id]);
+        // 2. Ažuriraj UI da prikaže da je chat soba kreirana.
+        // 3. Prikazati neku "uspešnu" poruku korisniku.
+      },
+      error: (error) => {
+        console.error('Greška pri kreiranju personalne chat sobe:', error);
+        // Ovde možeš dodati logiku za prikaz greške korisniku:
+        // Npr. prikazati poruku "Nije moguće kreirati chat sobu".
+        alert(`Greška: ${error.message || 'Nije moguće kreirati chat sobu.'}`);
+      }
+    });
+  }
+
+  startConversation() {
+    if (!this.userProfile || !this.userProfile.id) {
+      console.error('Greška: ID korisničkog profila nije dostupan.');
+      return;
+    }
+  
+    const otherUserId = this.userProfile.id;
+  
+  
+    this.chatService.createPersonalChat(otherUserId).subscribe(room => {
+      const chatRoom = {
+        id: room.id,
+        name: room.name ?? 'Chat'
+      };
+      this.chatUi.openWindow(chatRoom);
+    }, err => {
+      console.error('Neuspeh pri kreiranju četa:', err);
+      // prikazati toast ako želiš
+    });
+      
+  }
+  async checkInitialLikeStatus(): Promise<void> {
+    // if (!this.currentUser || this.currentUser.id === 0) { // Ako currentUser nije učitan ili je ID 0, preskoči
+    //     console.warn("Korisnik nije ulogovan ili currentUser.id je 0. Ne mogu proveriti status lajkova.");
+    //     // Postavi sve na false po defaultu ako korisnik nije ulogovan
+    //     this.posts.forEach(post => post.isLikedByUser = false);
+    //     return;
+    // }
+    //console.log('checking initial like status');
+    this.posts.forEach(post => {
+      //console.log(post);
+      this.postService.isPostLikedByUser(post.id).subscribe({
+        next: (isLiked: boolean) => {
+          post.isLikedByUser = isLiked;
+          //console.log(post.id, post.isLikedByUser);
+        },
+        error: (error: Error) => {
+          // Rukovanje greškama kada je isPostLikedByUser bez pipe()
+          console.error(`Greška pri proveri lajka za post ${post.id} u komponenti:`, error);
+          if (error instanceof HttpErrorResponse && error.status === 404) {
+            post.isLikedByUser = false; // Post ili korisnik nisu pronađeni, smatraj da nije lajkovano
+          } else {
+            post.isLikedByUser = false; // Za ostale greške, takođe smatraj da nije lajkovano
+          }
+        }
+      });
+    });
+  }
+editProfile() {
+  console.log('Navigating to edit-profile');
+  this.router.navigate(['edit-profile']);
+}
+
+
+
+
+
 }

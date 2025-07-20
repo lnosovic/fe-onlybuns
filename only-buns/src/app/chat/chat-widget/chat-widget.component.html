@@ -1,0 +1,52 @@
+<div class="fixed bottom-4 right-4 z-40">
+    <div class="chat-widget card w-80 bg-base-100 shadow-xl border border-base-200">
+      <div class="card-header p-4 bg-primary text-primary-content flex justify-between items-center rounded-t-xl cursor-pointer"
+           (click)="toggleWidget()">
+        <h2 class="card-title text-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          Chat
+        </h2>
+        <svg *ngIf="!isWidgetOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        </svg>
+        <svg *ngIf="isWidgetOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+  
+      <div class="card-body p-0 overflow-hidden transition-all duration-300 ease-in-out"
+           [class.h-0]="!isWidgetOpen"
+           [class.h-96]="isWidgetOpen"
+           [class.opacity-0]="!isWidgetOpen"
+           [class.opacity-100]="isWidgetOpen">
+  
+           <div class="recent-chats flex flex-col h-full bg-base-200 overflow-y-auto">
+            <h3 class="text-lg font-semibold p-4 border-b border-base-300">Recent Chats</h3>
+          
+            <div class="flex-grow">
+              <div *ngFor="let chat of recentChats"
+                   class="p-4 border-b border-base-300 cursor-pointer hover:bg-base-300 flex items-center gap-4"
+                   (click)="onOpenChat(chat.id, chat.name || 'chat')">
+                   
+                <!-- Avatar slika -->
+                <div class="avatar">
+                  <div class="w-12 h-12 rounded-full  overflow-hidden">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbB31S9Lp6PE8qvlrzC4YuI-CfykN4pAAllw&s" alt="Chat Avatar" />
+                  </div>
+                </div>
+          
+                <!-- Ime chata -->
+                <div>
+                  <p class="font-semibold text-base text-base-content">{{ chat.name }}</p>
+                  <!-- Ako budeš dodavao poruku ispod ili vreme, možeš ovde -->
+                  <!-- <p class="text-sm text-gray-500">Last message...</p> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  </div>
