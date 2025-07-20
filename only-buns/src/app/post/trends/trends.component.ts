@@ -30,8 +30,8 @@ export class TrendsComponent implements OnInit{
     followerCount: 0,
     followingCount: 0
   }
-  countAllPosts:Number=0;
-  countAllPostsThisMonth:Number=0;
+   countAllPosts: number | null = null;
+  countAllPostsThisMonth: number | null = null;
   isPostModalOpen :boolean=false;
   showComments:boolean=false;
   usernames: {[userId:number]:string}={};
@@ -121,7 +121,7 @@ export class TrendsComponent implements OnInit{
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json',
     });
-    this.http.get<Number>(`http://localhost:8080/api/posts/countAllPosts`,{headers}).subscribe({
+    this.http.get<number>(`http://localhost:8080/api/posts/countAllPosts`,{headers}).subscribe({
       next:(res)=>{
         console.log(res);
         this.countAllPosts=res;
@@ -137,7 +137,7 @@ export class TrendsComponent implements OnInit{
       'Accept': 'application/json',
     });
     console.log(token)
-    this.http.get<Number>(`http://localhost:8080/api/posts/countLastMonthPosts`,{headers}).subscribe({
+    this.http.get<number>(`http://localhost:8080/api/posts/countLastMonthPosts`,{headers}).subscribe({
       next:(res)=>{
         this.countAllPostsThisMonth=res;
       },

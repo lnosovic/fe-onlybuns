@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms'
 import { Router } from '@angular/router';
-import { Location } from '../../post/models/location.model';
+import { Location as PostLocation } from '../../post/models/location.model';
 import { User } from '../models/user.model';
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { MapComponent } from '../../layout/map/map.component';
 import { HttpClient,HttpHeaders } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-edit-profile',
@@ -30,7 +30,7 @@ export class EditProfileComponent implements OnInit{
   }
   submitted = false;
   confirmPassword: any|null=null;
-  SelectedLocation: Location | null = null;
+  SelectedLocation: PostLocation | null = null;
   mapResetTrigger: boolean = false; 
   changePassword: boolean = false;
   editForm = new FormGroup({
@@ -39,9 +39,12 @@ export class EditProfileComponent implements OnInit{
     password: new FormControl(''), // No validators initially
     confirmPassword: new FormControl(''), // No validators initially
   }, { validators: this.passwordMatchValidator() });
-  constructor(private router:Router,private http:HttpClient){}
+  constructor(private router:Router,private http:HttpClient,private location: Location){}
   ngOnInit(): void {
     this.loadCurrentUser();
+  }
+   goBack(): void {
+    this.location.back();
   }
   editUser():void{
     this.submitted = true;
@@ -72,7 +75,11 @@ export class EditProfileComponent implements OnInit{
       this.http.put(`http://localhost:8080/api/users/${this.currentUser.id}`, updatedUser, { headers}).subscribe({
         next:()=>{
           setTimeout(() => this.mapResetTrigger = false, 0);
-          this.logout();
+          if(this.changePassword){
+            this.logout();
+          }else{
+            this.goBack();
+          }
         },
         error: (err) => {
          if (err.error) {
@@ -97,7 +104,7 @@ export class EditProfileComponent implements OnInit{
     return null;
     };
   }
-  onLocationSelected(location: Location): void {
+  onLocationSelected(location: PostLocation): void {
     console.log('Received location from map:', location);
     this.SelectedLocation = location;
   }
